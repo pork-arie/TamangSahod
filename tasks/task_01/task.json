@@ -1,0 +1,42 @@
+{
+  "id": "task_01",
+  "title": "Regular holiday on rest day with overtime and night shift differential",
+  "difficulty": "medium",
+  "tags": [
+    "regular_holiday",
+    "rest_day",
+    "overtime",
+    "night_shift",
+    "meal_break"
+  ],
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- Hourly rate = daily rate ÷ 8.\n- Work on a regular holiday that is also the employee's scheduled rest day\n  is paid an additional 30% of the regular holiday rate of 200%\n  for the first 8 hours.\n- Overtime work (beyond 8 hours) on a regular holiday that falls on a\n  rest day is paid an additional 30% of the hourly rate on said day.\n- Night shift differential: an additional 10% of the hourly rate for\n  each hour worked between 10:00 PM and 6:00 AM. If the hour is also\n  holiday, rest day, or overtime work, the 10% is computed on the\n  applicable hourly rate for that hour.\n- Meal breaks of 1 hour are unpaid and not counted as hours worked.\n\nSCENARIO:\nMaria is a rank-and-file employee at a manufacturing company with 50\nemployees. Her daily rate is ₱640. December 30 is a regular holiday and\nalso her scheduled rest day. On December 30, she worked from 1:00 PM to\n12:00 midnight, with an unpaid 1-hour meal break from 5:00 PM to 6:00 PM.\n\nQUESTION:\nCompute Maria's total pay for December 30.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "expected_answer": 2258.88,
+  "tolerance": 0.01,
+  "failure_categories": [
+    "counted_meal_break_as_hours_worked",
+    "added_premiums_instead_of_multiplying",
+    "applied_night_differential_to_basic_rate_only",
+    "missed_overtime_premium",
+    "wrong_holiday_rest_day_multiplier",
+    "misidentified_night_hours"
+  ],
+  "source_refs": [
+    "TODO(verify): DOLE-BWC Handbook on Workers' Statutory Monetary Benefits — section/page for regular holiday + rest day pay",
+    "TODO(verify): DOLE-BWC Handbook — section/page for overtime on a regular holiday falling on a rest day",
+    "TODO(verify): DOLE-BWC Handbook — section/page for night shift differential"
+  ],
+  "reference_inputs": {
+    "daily_rate": 640,
+    "day_type": "regular_holiday_rest_day",
+    "intervals": [
+      [
+        "13:00",
+        "17:00"
+      ],
+      [
+        "18:00",
+        "24:00"
+      ]
+    ]
+  }
+}

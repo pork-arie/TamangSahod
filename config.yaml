@@ -1,0 +1,21 @@
+# Default settings for run_eval.py. --models and --trials can override these on the CLI.
+
+# OpenRouter model IDs. Free-tier models (":free") were checked on 2026-10-31;
+# the free list changes, so re-check https://openrouter.ai/models?max_price=0 before the final run.
+models:
+  - google/gemma-4-31b-it:free
+  - nvidia/nemotron-3-ultra-550b-a55b:free
+# Not usable: thinkingmachines/inkling:free returns HTTP 403 ("only available on agentic harnesses").
+
+trials_per_task: 3      # needed for pass^k (all k trials pass)
+temperature: 0.0        # low temperature = more reproducible; k trials still show variance
+# Output budget. Reasoning models spend most of it on hidden thinking: at 4096 Nemotron
+# was cut off before its FINAL ANSWER line in 3/3 trials. Truncated trials are graded
+# format_failure and also counted in the report's "Truncated" column.
+max_tokens: 16384
+
+# Network behaviour
+request_timeout_seconds: 120
+max_retries: 10          # retries on rate limits / 5xx / network errors (free models 429 a lot)
+backoff_base_seconds: 2  # wait = base * 2^attempt (+ jitter), capped below
+backoff_max_seconds: 90  # a server Retry-After header can raise a wait above this (up to 300s)

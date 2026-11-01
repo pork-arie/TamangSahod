@@ -1,0 +1,16 @@
+# Secrets
+.env
+
+# Raw run outputs (keep only the curated sample)
+results/*
+!results/sample/
+!results/sample/**
+!results/summary.md
+!results/pass_rate.png
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
