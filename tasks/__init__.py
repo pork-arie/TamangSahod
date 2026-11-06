@@ -1,11 +1,26 @@
-"""Shared helper for loading task folders (tasks/<id>/task.json)."""
+"""Shared helpers for loading task folders (tasks/<id>/task.json)."""
 
+import hashlib
 import json
 from pathlib import Path
 
 TASKS_DIR = Path(__file__).resolve().parent
 
 REQUIRED_FIELDS = ["id", "title", "difficulty", "tags", "prompt", "expected_answer"]
+
+
+def prompt_sha256(prompt: str) -> str:
+    """Fingerprint of the exact prompt text. If a task's prompt is edited, this changes."""
+    return hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+
+
+def saved_prompt_sha256(trial: dict) -> str:
+    """Hash of the prompt a saved trial was run with.
+
+    Trials saved before prompt_sha256 existed still contain the full prompt text,
+    so we can compute the hash from it.
+    """
+    return trial.get("prompt_sha256") or prompt_sha256(trial.get("prompt", ""))
 
 
 def load_tasks(selection="all"):

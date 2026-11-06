@@ -2,12 +2,16 @@
 
 Examples:
   python run_eval.py                                  # everything from config.yaml
-  python run_eval.py --models openai/gpt-4o --tasks task_01 --trials 3
+  python run_eval.py --models google/gemma-4-31b-it:free --tasks task_01 --trials 3
   python run_eval.py --models a/x,b/y --tasks all
+  python run_eval.py --max-cost-usd 2.00             # stop once reported cost reaches $2
 
 Each trial is saved as its own JSON file:
   results/raw/<model>/<task_id>/trial_<n>.json
-If that file already exists, the trial is skipped. That is how resuming works.
+
+Resuming: a trial is skipped only if its file exists AND it was run with the
+exact same prompt (same prompt_sha256). If the task's prompt was edited since,
+the old file is moved to results/stale/<model>/<task_id>/ and the trial re-runs.
 
 API problems (rate limits, timeouts, 5xx, malformed responses) are retried with
 exponential backoff. If retries run out, the trial is logged to
@@ -29,10 +33,11 @@ import yaml
 from dotenv import load_dotenv
 
 from grader import grade
-from tasks import load_tasks
+from tasks import load_tasks, prompt_sha256, saved_prompt_sha256
 
 ROOT = Path(__file__).resolve().parent
 RAW_DIR = ROOT / "results" / "raw"
+STALE_DIR = ROOT / "results" / "stale"
 ERROR_LOG = ROOT / "results" / "api_errors.jsonl"
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
@@ -57,6 +62,12 @@ def load_config(path=ROOT / "config.yaml"):
         return yaml.safe_load(f)
 
 
+def max_tokens_for(model: str, cfg: dict) -> int:
+    """Per-model output budget: an override from config.yaml, else the default."""
+    overrides = cfg.get("max_tokens_overrides") or {}
+    return overrides.get(model, cfg["max_tokens"])
+
+
 def model_dirname(model: str) -> str:
     """'openai/gpt-4o' -> 'openai__gpt-4o' (safe as a folder name on every OS)."""
     return model.replace("/", "__").replace(":", "_")
@@ -66,7 +77,26 @@ def trial_path(model: str, task_id: str, trial: int) -> Path:
     return RAW_DIR / model_dirname(model) / task_id / f"trial_{trial}.json"
 
 
-def call_model(api_key, model, prompt, cfg):
+def is_current(path: Path, task: dict) -> bool:
+    """True if the saved trial was run with the task's CURRENT prompt."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            saved = json.load(f)
+    except (OSError, ValueError):
+        return False  # unreadable file: treat as stale and re-run
+    return saved_prompt_sha256(saved) == prompt_sha256(task["prompt"])
+
+
+def move_to_stale(path: Path, model: str, task_id: str) -> Path:
+    """Move an outdated trial file out of results/raw/ (kept, never deleted)."""
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    dest = STALE_DIR / model_dirname(model) / task_id / f"{path.stem}.{stamp}.json"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    os.replace(path, dest)
+    return dest
+
+
+def call_model(api_key, model, prompt, cfg, max_tokens):
     """Send one chat request with retries. Returns (response_json, latency_seconds)."""
     headers = {
         "Authorization": f"Bearer {api_key}",  # the key is only ever sent here, never printed
@@ -76,7 +106,7 @@ def call_model(api_key, model, prompt, cfg):
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": cfg["temperature"],
-        "max_tokens": cfg["max_tokens"],
+        "max_tokens": max_tokens,
         "usage": {"include": True},  # ask OpenRouter to report token counts + cost
     }
 
@@ -130,7 +160,8 @@ def call_model(api_key, model, prompt, cfg):
 
 def run_trial(api_key, model, task, trial, cfg):
     """Call the model once, grade it, and return the record to save."""
-    data, latency = call_model(api_key, model, task["prompt"], cfg)
+    max_tokens = max_tokens_for(model, cfg)
+    data, latency = call_model(api_key, model, task["prompt"], cfg, max_tokens)
     choice = data["choices"][0]
     message = choice.get("message") or {}
     content = message.get("content") or ""
@@ -144,14 +175,17 @@ def run_trial(api_key, model, task, trial, cfg):
         "provider": data.get("provider"),
         "trial": trial,
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "settings": {"temperature": cfg["temperature"], "max_tokens": cfg["max_tokens"]},
+        "settings": {"temperature": cfg["temperature"], "max_tokens": max_tokens},
+        "prompt_sha256": prompt_sha256(task["prompt"]),  # detects later edits to the task
         "prompt": task["prompt"],
         "response": content,                   # the only text the grader sees
         "reasoning": message.get("reasoning"), # hidden thinking, if the model/provider returns it
         "finish_reason": choice.get("finish_reason"),  # "length" = cut off by max_tokens
-        "expected_answer": result["expected"],
+        "expected_answer": result["expected"], # the answer key used at grading time
+        "tolerance": str(task["tolerance"]),
         "extracted_answer": result["extracted"],
         "status": result["status"],            # pass | fail | format_failure
+        "format_reason": result["format_reason"],
         "passed": result["status"] == "pass",
         "score": result["score"],
         "latency_seconds": round(latency, 3),
@@ -187,6 +221,8 @@ def parse_args(cfg):
     p.add_argument("--models", help="comma-separated OpenRouter model ids (default: config.yaml)")
     p.add_argument("--tasks", default="all", help='"all" or comma-separated task ids')
     p.add_argument("--trials", type=int, default=cfg["trials_per_task"], help="trials per task per model")
+    p.add_argument("--max-cost-usd", type=float, default=None,
+                   help="stop starting new trials once this run's reported cost reaches this many USD")
     args = p.parse_args()
     args.models = [m.strip() for m in args.models.split(",")] if args.models else cfg["models"]
     return args
@@ -203,20 +239,35 @@ def main():
     if not api_key:
         sys.exit("OPENROUTER_API_KEY is not set. Copy .env.example to .env and add your key.")
 
-    totals = {"new": 0, "skipped": 0, "api_errors": 0, "prompt_tokens": 0,
+    totals = {"new": 0, "skipped": 0, "stale": 0, "api_errors": 0, "prompt_tokens": 0,
               "completion_tokens": 0, "cost_usd": 0.0, "cost_missing": 0}
+    budget_hit = False
 
     for model in args.models:
-        print(f"\n=== {model} ===")
+        if budget_hit:
+            break
+        print(f"\n=== {model} (max_tokens={max_tokens_for(model, cfg)}) ===")
         model_broken = False
         for task in tasks:
             for trial in range(1, args.trials + 1):
                 path = trial_path(model, task["id"], trial)
+
+                # Resume: keep a saved trial only if it used the current prompt.
                 if path.exists():
-                    totals["skipped"] += 1
-                    continue
+                    if is_current(path, task):
+                        totals["skipped"] += 1
+                        continue
+                    dest = move_to_stale(path, model, task["id"])
+                    totals["stale"] += 1
+                    print(f"  {task['id']} trial {trial}: prompt changed, old result moved to "
+                          f"{dest.relative_to(ROOT)}")
+
                 if model_broken:
                     break
+                if args.max_cost_usd is not None and totals["cost_usd"] >= args.max_cost_usd:
+                    budget_hit = True
+                    break
+
                 print(f"  {task['id']} trial {trial} ...", end=" ", flush=True)
                 try:
                     record = run_trial(api_key, model, task, trial, cfg)
@@ -241,14 +292,24 @@ def main():
                 truncated = " (truncated: hit max_tokens)" if record["finish_reason"] == "length" else ""
                 print(f"{record['status']:<15} got={record['extracted_answer']} "
                       f"({record['latency_seconds']}s){truncated}")
+            if budget_hit:
+                break
 
     print("\n--- Run summary (this run only) ---")
+    if budget_hit:
+        print(f"STOPPED EARLY: reported cost reached --max-cost-usd {args.max_cost_usd:.2f}. "
+              "Rerun to continue where it stopped.")
     print(f"new trials:        {totals['new']}")
     print(f"skipped (resumed): {totals['skipped']}")
+    if totals["stale"]:
+        print(f"stale (re-run):    {totals['stale']}  -> old files in results/stale/")
     print(f"API errors:        {totals['api_errors']}" + ("  -> see results/api_errors.jsonl" if totals["api_errors"] else ""))
     print(f"prompt tokens:     {totals['prompt_tokens']:,}")
     print(f"completion tokens: {totals['completion_tokens']:,}")
-    cost_note = f"  ({totals['cost_missing']} trial(s) had no cost reported)" if totals["cost_missing"] else ""
+    cost_note = ""
+    if totals["cost_missing"]:
+        cost_note = f"  ({totals['cost_missing']} trial(s) had no cost reported"
+        cost_note += "; --max-cost-usd cannot count these)" if args.max_cost_usd is not None else ")"
     print(f"cost (USD):        ${totals['cost_usd']:.4f}{cost_note}")
     print("\nNext: python report.py")
 

@@ -21,7 +21,7 @@ import matplotlib
 matplotlib.use("Agg")  # render to file; no display needed
 import matplotlib.pyplot as plt
 
-from tasks import load_tasks
+from tasks import load_tasks, prompt_sha256, saved_prompt_sha256
 
 ROOT = Path(__file__).resolve().parent
 RAW_DIR = ROOT / "results" / "raw"
@@ -29,12 +29,32 @@ SUMMARY_MD = ROOT / "results" / "summary.md"
 CHART_PNG = ROOT / "results" / "pass_rate.png"
 
 
-def load_trials():
-    trials = []
+def load_trials(tasks):
+    """Load saved trials, keeping only those run with each task's CURRENT prompt.
+
+    Returns (kept, ignored) where ignored is a list of (path, reason).
+    """
+    current_hash = {t["id"]: prompt_sha256(t["prompt"]) for t in tasks}
+    kept, ignored = [], []
     for path in sorted(RAW_DIR.glob("*/*/trial_*.json")):
         with open(path, encoding="utf-8") as f:
-            trials.append(json.load(f))
-    return trials
+            trial = json.load(f)
+        rel = path.relative_to(ROOT)
+        if trial["task_id"] not in current_hash:
+            ignored.append((rel, "task no longer exists"))
+        elif saved_prompt_sha256(trial) != current_hash[trial["task_id"]]:
+            ignored.append((rel, "prompt changed since this trial ran (stale)"))
+        else:
+            kept.append(trial)
+    return kept, ignored
+
+
+def settings_warnings(trials):
+    """One warning per model whose trials were run with different settings (e.g. max_tokens)."""
+    by_model = defaultdict(set)
+    for t in trials:
+        by_model[t["model"]].add(json.dumps(t.get("settings"), sort_keys=True))
+    return [f"{m}: trials used mixed settings {sorted(s)}" for m, s in by_model.items() if len(s) > 1]
 
 
 def pct(num, den):
@@ -45,9 +65,8 @@ def summarise(trials, tasks):
     """Group trials by (model, task) and compute every number the report needs."""
     task_meta = {t["id"]: t for t in tasks}
     by_model_task = defaultdict(list)       # (model, task_id) -> [trial, ...]
-    for t in trials:
-        if t["task_id"] in task_meta:        # ignore results for tasks that were removed
-            by_model_task[(t["model"], t["task_id"])].append(t)
+    for t in trials:                         # load_trials already dropped stale/unknown tasks
+        by_model_task[(t["model"], t["task_id"])].append(t)
 
     models = sorted({m for m, _ in by_model_task})
     task_ids = [t["id"] for t in tasks if any((m, t["id"]) in by_model_task for m in models)]
@@ -164,10 +183,20 @@ def write_chart(models, stats):
 
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
-    trials = load_trials()
+    tasks = load_tasks("all")
+    trials, ignored = load_trials(tasks)
+
+    if ignored:
+        print(f"WARNING: ignoring {len(ignored)} trial(s) that don't match the current tasks:")
+        for path, reason in ignored:
+            print(f"  - {path}: {reason}")
+        print("  (python run_eval.py moves stale trials to results/stale/ and re-runs them)\n")
+    for w in settings_warnings(trials):
+        print(f"WARNING: {w}\n")
+
     if not trials:
-        sys.exit(f"No trials found in {RAW_DIR}. Run: python run_eval.py")
-    models, task_ids, task_meta, stats, by_model_task = summarise(trials, load_tasks("all"))
+        sys.exit(f"No current trials found in {RAW_DIR}. Run: python run_eval.py")
+    models, task_ids, task_meta, stats, by_model_task = summarise(trials, tasks)
     write_markdown(models, task_ids, task_meta, stats, by_model_task)
     write_chart(models, stats)
     print(SUMMARY_MD.read_text(encoding="utf-8"))
