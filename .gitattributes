@@ -1,0 +1,6 @@
+# Store and check out text files with LF line endings on every OS,
+# so the repo is byte-identical for judges on Windows, macOS, and Linux.
+* text=auto eol=lf
+
+# Binary files: never touch line endings
+*.png binary

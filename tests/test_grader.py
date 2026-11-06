@@ -52,7 +52,6 @@ EXPECTED = "2258.88"
     ("FINAL ANSWER: ₱", "format_failure"),
     ("FINAL ANSWER:\n₱2,258.88", "format_failure"),     # amount not on the same line
     ("FINAL ANSWER: ₱2,258.88 or ₱2,529.28", "format_failure"),  # two amounts: refuse to guess
-    ("FINAL ANSWER: ₱2,258.88 (two thousand...)", "format_failure"),
     ("FINAL ANSWER: approximately ₱2,258.88", "format_failure"),
     ("FINAL ANSWER: ₱22,58.88", "format_failure"),      # invalid thousands grouping
     ("FINAL ANSWER: ₱2.258,88", "format_failure"),      # European format, ambiguous
@@ -65,6 +64,77 @@ def test_grade(response, status):
     result = grade(response, EXPECTED)
     assert result["status"] == status, f"{response!r} -> {result}"
     assert result["score"] == (1 if status == "pass" else 0)
+
+
+# ---------------------------------------------------------------------------
+# Part A additions: "P" prefix, LaTeX wrappers, trailing label, format_reason
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("response", [
+    # "P" / "P." peso prefix, common in the Philippines
+    "FINAL ANSWER: P2,258.88",
+    "FINAL ANSWER: P 2,258.88",
+    "FINAL ANSWER: P.2,258.88",
+    "FINAL ANSWER: P. 2,258.88",
+    "FINAL ANSWER: **P2,258.88**",
+    # LaTeX wrappers
+    r"FINAL ANSWER: \boxed{2258.88}",
+    r"FINAL ANSWER: \boxed{2,258.88}",
+    r"FINAL ANSWER: \boxed{2{,}258.88}",
+    r"FINAL ANSWER: $\text{₱}2,258.88$",
+    r"FINAL ANSWER: \(\text{₱}2,258.88\)",
+    r"FINAL ANSWER: $\boxed{\text{₱}2{,}258.88}$",
+    r"FINAL ANSWER: \boxed{\text{PHP } 2,258.88}",
+    # one short trailing label with no digits
+    "FINAL ANSWER: ₱2,258.88 (total pay)",
+    "FINAL ANSWER: ₱2,258.88 (total pay).",
+    "FINAL ANSWER: P2,258.88 (Maria's total pay)",
+    "FINAL ANSWER: ₱2,258.88 (two thousand...)",
+])
+def test_new_accepted_forms_pass(response):
+    result = grade(response, EXPECTED)
+    assert result["status"] == "pass", f"{response!r} -> {result}"
+    assert result["format_reason"] is None
+
+
+@pytest.mark.parametrize("response, reason", [
+    # the new rules must not create false passes
+    ("FINAL ANSWER: P2,258.88 or P2,529.28", "multiple_amounts"),
+    (r"FINAL ANSWER: \boxed{2,258.88} or \boxed{2,529.28}", "multiple_amounts"),
+    ("FINAL ANSWER: ₱2,258.88 (₱1,664.00 + ₱594.88)", "multiple_amounts"),  # digits in the label
+    ("FINAL ANSWER: ₱2,258.88 (for 10 hours)", "multiple_amounts"),
+    ("FINAL ANSWER: P2,258.88 (total pay for December 30th)", "multiple_amounts"),  # any digit -> rejected
+    ("FINAL ANSWER: ₱2,258.88 (total) (approx)", "extra_text"),              # only ONE label allowed
+    ("FINAL ANSWER: Pay is 2,258.88", "extra_text"),                        # "Pay" is not a "P" prefix
+    ("FINAL ANSWER: PP2,258.88", "extra_text"),
+    ("FINAL ANSWER: p2,258.88", "extra_text"),                              # lowercase p is not accepted
+    ("FINAL ANSWER: approximately ₱2,258.88", "extra_text"),
+    ("FINAL ANSWER: N/A", "extra_text"),
+    ("Pay is 2,258.88", "no_final_line"),
+    ("Total pay is P2,258.88", "no_final_line"),
+    ("FINAL ANSWER = ₱2,258.88", "no_final_line"),
+    ("", "no_final_line"),
+    ("FINAL ANSWER:", "empty_answer"),
+    ("FINAL ANSWER: ₱", "empty_answer"),
+    ("FINAL ANSWER: P.", "empty_answer"),
+    (r"FINAL ANSWER: \boxed{}", "empty_answer"),
+    ("FINAL ANSWER:\n₱2,258.88", "empty_answer"),
+    ("FINAL ANSWER: ₱22,58.88", "malformed_number"),
+    ("FINAL ANSWER: ₱2.258,88", "malformed_number"),
+    ("FINAL ANSWER: ₱2,258.885", "malformed_number"),
+    ("FINAL ANSWER: P2,258.885", "malformed_number"),
+])
+def test_format_failure_reasons(response, reason):
+    result = grade(response, EXPECTED)
+    assert result["status"] == "format_failure", f"{response!r} -> {result}"
+    assert result["format_reason"] == reason, f"{response!r} -> {result}"
+    assert result["score"] == 0
+
+
+def test_p_prefix_wrong_amount_is_fail_not_format():
+    # A parsable but wrong answer must be "fail", with no format_reason.
+    result = grade("FINAL ANSWER: P2,529.28", EXPECTED)
+    assert result["status"] == "fail" and result["format_reason"] is None
 
 
 def test_extracted_values_are_exact():
@@ -90,6 +160,8 @@ def test_custom_tolerance():
 
 def test_result_fields():
     r = grade("FINAL ANSWER: ₱2,258.88", 2258.88)
-    assert r == {"status": "pass", "score": 1, "extracted": "2258.88", "expected": "2258.88"}
+    assert r == {"status": "pass", "score": 1, "extracted": "2258.88", "expected": "2258.88",
+                 "format_reason": None}
     r = grade("nothing", 2258.88)
     assert r["extracted"] is None and r["status"] == "format_failure"
+    assert r["format_reason"] == "no_final_line"
