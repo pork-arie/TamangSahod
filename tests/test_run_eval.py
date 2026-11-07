@@ -42,6 +42,8 @@ def sandbox(tmp_path, monkeypatch):
     for module in (run_eval, regrade, report):
         monkeypatch.setattr(module, "ROOT", tmp_path)
         monkeypatch.setattr(module, "RAW_DIR", tmp_path / "results" / "raw")
+    monkeypatch.setattr(report, "SUMMARY_MD", tmp_path / "results" / "summary.md")
+    monkeypatch.setattr(report, "CHART_PNG", tmp_path / "results" / "pass_rate.png")
     monkeypatch.setattr(run_eval, "STALE_DIR", tmp_path / "results" / "stale")
     monkeypatch.setattr(run_eval, "ERROR_LOG", tmp_path / "results" / "api_errors.jsonl")
     monkeypatch.setattr(run_eval, "load_config", lambda: dict(CFG))
@@ -58,7 +60,9 @@ def sandbox(tmp_path, monkeypatch):
 
 
 def run_main(monkeypatch, *cli):
-    monkeypatch.setattr(sys, "argv", ["run_eval.py", "--models", MODEL, "--tasks", "task_01", *cli])
+    # task_01 is a draft until verified, so these tests opt in with --include-drafts.
+    monkeypatch.setattr(sys, "argv", ["run_eval.py", "--models", MODEL, "--tasks", "task_01",
+                                      "--include-drafts", *cli])
     run_eval.main()
 
 
@@ -78,7 +82,7 @@ def test_max_tokens_default_and_override():
 def test_override_is_sent_and_saved(sandbox, monkeypatch):
     tmp_path, calls = sandbox
     monkeypatch.setattr(sys, "argv", ["run_eval.py", "--models", "test/reasoner", "--tasks", "task_01",
-                                      "--trials", "1"])
+                                      "--include-drafts", "--trials", "1"])
     run_eval.main()
     assert calls[0]["max_tokens"] == 16384
     assert saved(tmp_path, model="test/reasoner")["settings"] == {"temperature": 0.0, "max_tokens": 16384}

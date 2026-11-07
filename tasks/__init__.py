@@ -6,7 +6,7 @@ from pathlib import Path
 
 TASKS_DIR = Path(__file__).resolve().parent
 
-REQUIRED_FIELDS = ["id", "title", "difficulty", "tags", "prompt", "expected_answer"]
+REQUIRED_FIELDS = ["id", "title", "difficulty", "tags", "prompt", "expected_answer", "verified"]
 
 
 def prompt_sha256(prompt: str) -> str:
@@ -23,15 +23,21 @@ def saved_prompt_sha256(trial: dict) -> str:
     return trial.get("prompt_sha256") or prompt_sha256(trial.get("prompt", ""))
 
 
-def load_tasks(selection="all"):
-    """Load tasks sorted by id. selection is "all" or a comma list like "task_01,task_03"."""
+def load_tasks(selection="all", tasks_dir=TASKS_DIR):
+    """Load tasks sorted by id. selection is "all" or a comma list like "task_01,task_03".
+
+    Every task must have "verified": true or false. Draft tasks (false) are still
+    loaded here; run_eval.py and report.py decide whether to use them.
+    """
     tasks = []
-    for path in sorted(TASKS_DIR.glob("*/task.json")):
+    for path in sorted(Path(tasks_dir).glob("*/task.json")):
         with open(path, encoding="utf-8") as f:
             task = json.load(f)
         missing = [k for k in REQUIRED_FIELDS if k not in task]
         if missing:
             raise ValueError(f"{path} is missing fields: {missing}")
+        if not isinstance(task["verified"], bool):
+            raise ValueError(f"{path}: \"verified\" must be true or false, got {task['verified']!r}")
         if task["id"] != path.parent.name:
             raise ValueError(f"{path}: id {task['id']!r} must match folder name {path.parent.name!r}")
         task.setdefault("tolerance", 0.01)

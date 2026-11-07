@@ -2,6 +2,7 @@
   "id": "task_01",
   "title": "Regular holiday on rest day with overtime and night shift differential",
   "difficulty": "medium",
+  "verified": false,
   "tags": [
     "regular_holiday",
     "rest_day",

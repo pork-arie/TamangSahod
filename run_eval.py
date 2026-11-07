@@ -5,6 +5,9 @@ Examples:
   python run_eval.py --models google/gemma-4-31b-it:free --tasks task_01 --trials 3
   python run_eval.py --models a/x,b/y --tasks all
   python run_eval.py --max-cost-usd 2.00             # stop once reported cost reaches $2
+  python run_eval.py --include-drafts                # also run tasks with verified=false
+
+Only verified tasks ("verified": true in task.json) run by default.
 
 Each trial is saved as its own JSON file:
   results/raw/<model>/<task_id>/trial_<n>.json
@@ -223,6 +226,8 @@ def parse_args(cfg):
     p.add_argument("--trials", type=int, default=cfg["trials_per_task"], help="trials per task per model")
     p.add_argument("--max-cost-usd", type=float, default=None,
                    help="stop starting new trials once this run's reported cost reaches this many USD")
+    p.add_argument("--include-drafts", action="store_true",
+                   help="also run draft tasks (verified=false); their results are marked DRAFT")
     args = p.parse_args()
     args.models = [m.strip() for m in args.models.split(",")] if args.models else cfg["models"]
     return args
@@ -233,6 +238,15 @@ def main():
     cfg = load_config()
     args = parse_args(cfg)
     tasks = load_tasks(args.tasks)
+
+    # Verification gate: draft tasks only run when explicitly asked for.
+    drafts = [t["id"] for t in tasks if not t["verified"]]
+    if drafts and not args.include_drafts:
+        print(f"Skipping draft task(s) (verified=false): {', '.join(drafts)}. "
+              "Use --include-drafts to run them anyway.")
+        tasks = [t for t in tasks if t["verified"]]
+    if not tasks:
+        sys.exit("No tasks to run. Verify a task (set \"verified\": true) or pass --include-drafts.")
 
     load_dotenv(ROOT / ".env")
     api_key = os.environ.get("OPENROUTER_API_KEY")

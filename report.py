@@ -10,8 +10,15 @@ Metrics:
   format     = share of trials with no parsable FINAL ANSWER line
   truncated  = share of trials cut off by max_tokens (finish_reason "length"); these are
                usually also format failures, so a high value means "budget", not "skill"
+
+Only verified tasks are reported by default. With --include-drafts, draft tasks
+are added and every place they appear is marked DRAFT.
+
+  python report.py
+  python report.py --include-drafts
 """
 
+import argparse
 import json
 import sys
 from collections import defaultdict
@@ -113,8 +120,18 @@ def breakdown_table(models, task_ids, task_meta, by_model_task, key_fn, label):
     return lines
 
 
+def task_label(task):
+    """Task id as shown in tables; drafts are always visibly marked."""
+    return task["id"] if task["verified"] else f"{task['id']} (DRAFT)"
+
+
 def write_markdown(models, task_ids, task_meta, stats, by_model_task):
     out = ["# Results", ""]
+    draft_ids = [tid for tid in task_ids if not task_meta[tid]["verified"]]
+    if draft_ids:
+        out += [f"> **DRAFT RESULTS INCLUDED.** {len(draft_ids)} task(s) are not yet verified "
+                f"against the DOLE-BWC Handbook: {', '.join(draft_ids)}. "
+                "Do not cite these numbers as final.", ""]
 
     out += ["## Overall", "",
             "| Model | Pass rate | pass^k | Format failures | Truncated | Trials |",
@@ -137,7 +154,8 @@ def write_markdown(models, task_ids, task_meta, stats, by_model_task):
         for m in models:
             p, n = stats[m]["per_task"].get(tid, (0, 0))
             cells.append(f"{p}/{n}" if n else "–")
-        out.append(f"| {tid} | {task_meta[tid]['difficulty']} | " + " | ".join(cells) + " |")
+        out.append(f"| {task_label(task_meta[tid])} | {task_meta[tid]['difficulty']} | "
+                   + " | ".join(cells) + " |")
     out.append("")
 
     out += ["## By difficulty", ""]
@@ -152,7 +170,7 @@ def write_markdown(models, task_ids, task_meta, stats, by_model_task):
     SUMMARY_MD.write_text("\n".join(out), encoding="utf-8")
 
 
-def write_chart(models, stats):
+def write_chart(models, stats, has_drafts=False):
     """Horizontal bar chart (model names are long), sorted best -> worst, labelled values."""
     rows = sorted(((100 * stats[m]["passed"] / stats[m]["total"], m) for m in models), reverse=True)
     values = [r[0] for r in rows]
@@ -167,7 +185,10 @@ def write_chart(models, stats):
     ax.invert_yaxis()  # best model on top
     ax.set_xlim(0, 100)
     ax.set_xlabel("Pass rate (% of trials)", color=ink_muted)
-    ax.set_title("PH payroll eval: overall pass rate by model", color=ink, loc="left", fontsize=12)
+    title = "PH payroll eval: overall pass rate by model"
+    if has_drafts:
+        title += "  (includes DRAFT tasks)"
+    ax.set_title(title, color=ink, loc="left", fontsize=12)
     for yi, v in zip(y, values):
         ax.text(v + 1, yi, f"{v:.0f}%", va="center", color=ink, fontsize=10)
     ax.grid(axis="x", color="#e4e3df", linewidth=0.8)
@@ -183,8 +204,23 @@ def write_chart(models, stats):
 
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
+    p = argparse.ArgumentParser(description="Summarise saved trials into tables and a chart.")
+    p.add_argument("--include-drafts", action="store_true",
+                   help="also report draft tasks (verified=false), marked DRAFT")
+    args = p.parse_args()
+
     tasks = load_tasks("all")
-    trials, ignored = load_trials(tasks)
+    trials, ignored = load_trials(tasks)  # stale check uses ALL tasks, drafts included
+
+    # Verification gate: leave draft tasks out unless asked for.
+    draft_ids = {t["id"] for t in tasks if not t["verified"]}
+    if not args.include_drafts:
+        excluded = [t for t in trials if t["task_id"] in draft_ids]
+        if excluded:
+            print(f"Note: {len(excluded)} trial(s) on draft task(s) {', '.join(sorted(draft_ids))} "
+                  "are excluded. Use --include-drafts to see them (marked DRAFT).\n")
+        trials = [t for t in trials if t["task_id"] not in draft_ids]
+        tasks = [t for t in tasks if t["verified"]]
 
     if ignored:
         print(f"WARNING: ignoring {len(ignored)} trial(s) that don't match the current tasks:")
@@ -195,10 +231,11 @@ def main():
         print(f"WARNING: {w}\n")
 
     if not trials:
-        sys.exit(f"No current trials found in {RAW_DIR}. Run: python run_eval.py")
+        hint = " (all tasks are drafts? try --include-drafts)" if draft_ids and not args.include_drafts else ""
+        sys.exit(f"No current trials to report{hint}. Run: python run_eval.py")
     models, task_ids, task_meta, stats, by_model_task = summarise(trials, tasks)
     write_markdown(models, task_ids, task_meta, stats, by_model_task)
-    write_chart(models, stats)
+    write_chart(models, stats, has_drafts=any(not task_meta[tid]["verified"] for tid in task_ids))
     print(SUMMARY_MD.read_text(encoding="utf-8"))
     print(f"\nWrote {SUMMARY_MD.relative_to(ROOT)} and {CHART_PNG.relative_to(ROOT)}")
 

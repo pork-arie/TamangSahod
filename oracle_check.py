@@ -6,6 +6,10 @@ For each task this runs three checks:
      same amount as expected_answer, and that output is graded "pass" too.
   3. A deliberately wrong answer (expected + ₱1.00) is graded "fail", which
      shows the grader is not just passing everything.
+  4. Verification gate: a task marked "verified": true must have source_refs,
+     and none of them may still contain "TODO".
+
+Draft tasks (verified=false) get checks 1-3 too, so they are ready to verify.
 
 Run:  python oracle_check.py      (exit code 0 = all good, 1 = something failed)
 """
@@ -44,6 +48,15 @@ def check_task(task):
     if grade(wrong, expected, tol)["status"] != "fail":
         problems.append("grader accepted a wrong answer (expected + 1.00)")
 
+    # 4. verification gate
+    if task["verified"]:
+        refs = task.get("source_refs") or []
+        if not refs:
+            problems.append("verified=true but source_refs is empty")
+        todo_refs = [r for r in refs if "TODO" in r]
+        if todo_refs:
+            problems.append(f"verified=true but {len(todo_refs)} source_ref(s) still contain TODO")
+
     return problems
 
 
@@ -54,11 +67,14 @@ def main():
     for task in tasks:
         problems = check_task(task)
         mark = "OK  " if not problems else "FAIL"
-        print(f"[{mark}] {task['id']}  expected ₱{Decimal(str(task['expected_answer'])):,.2f}")
+        kind = "VERIFIED" if task["verified"] else "DRAFT   "
+        print(f"[{mark}] {kind} {task['id']}  expected ₱{Decimal(str(task['expected_answer'])):,.2f}")
         for p in problems:
             print(f"        - {p}")
         all_ok = all_ok and not problems
-    print(f"\n{len(tasks)} task(s) checked: {'ALL PASSED' if all_ok else 'FAILURES FOUND'}")
+    drafts = sum(not t["verified"] for t in tasks)
+    print(f"\n{len(tasks)} task(s) checked ({len(tasks) - drafts} verified, {drafts} draft): "
+          f"{'ALL PASSED' if all_ok else 'FAILURES FOUND'}")
     return 0 if all_ok else 1
 
 

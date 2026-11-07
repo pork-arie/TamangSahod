@@ -1,10 +1,12 @@
 # Results
 
+> **DRAFT RESULTS INCLUDED.** 1 task(s) are not yet verified against the DOLE-BWC Handbook: task_01. Do not cite these numbers as final.
+
 ## Overall
 
 | Model | Pass rate | pass^k | Format failures | Truncated | Trials |
 |---|---|---|---|---|---|
-| `google/gemma-4-31b-it:free` | 100% (3/3) | 100% (1/1 tasks, k=3) | 0% | 0% | 3 |
+| `google/gemma-4-31b-it:free` | 100% (2/2) | 100% (1/1 tasks, k=2) | 0% | 0% | 2 |
 | `nvidia/nemotron-3-ultra-550b-a55b:free` | 100% (3/3) | 100% (1/1 tasks, k=3) | 0% | 0% | 3 |
 
 _pass^k = share of tasks where every one of the k trials passed. Truncated = reply cut off by max_tokens (counted inside format failures)._
@@ -13,7 +15,7 @@ _pass^k = share of tasks where every one of the k trials passed. Truncated = rep
 
 | Task | Difficulty | `google/gemma-4-31b-it:free` | `nvidia/nemotron-3-ultra-550b-a55b:free` |
 |---|---|---|---|
-| task_01 | medium | 3/3 | 3/3 |
+| task_01 (DRAFT) | medium | 2/2 | 3/3 |
 
 ## By difficulty
 
