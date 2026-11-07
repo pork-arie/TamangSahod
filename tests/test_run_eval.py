@@ -44,6 +44,7 @@ def sandbox(tmp_path, monkeypatch):
         monkeypatch.setattr(module, "RAW_DIR", tmp_path / "results" / "raw")
     monkeypatch.setattr(report, "SUMMARY_MD", tmp_path / "results" / "summary.md")
     monkeypatch.setattr(report, "CHART_PNG", tmp_path / "results" / "pass_rate.png")
+    monkeypatch.setattr(report, "TASKS_MD", tmp_path / "results" / "tasks_table.md")
     monkeypatch.setattr(run_eval, "STALE_DIR", tmp_path / "results" / "stale")
     monkeypatch.setattr(run_eval, "ERROR_LOG", tmp_path / "results" / "api_errors.jsonl")
     monkeypatch.setattr(run_eval, "load_config", lambda: dict(CFG))

@@ -2,7 +2,7 @@
   "id": "task_05",
   "title": "Full week: rest day with overtime, unworked special day, regular holiday with night hours",
   "difficulty": "hard",
-  "verified": false,
+  "verified": true,
   "tags": [
     "weekly_payroll",
     "rest_day",
@@ -26,11 +26,13 @@
     "rounding_error"
   ],
   "source_refs": [
-    "TODO(verify): DOLE-BWC Handbook — section/page for rest day premium and overtime on a rest day",
-    "TODO(verify): DOLE-BWC Handbook — section/page for work on a regular holiday",
-    "TODO(verify): DOLE-BWC Handbook — section/page for unworked special non-working day (no work, no pay)",
-    "TODO(verify): DOLE-BWC Handbook — section/page for night shift differential",
-    "TODO(verify): rounding practice (round each day, then sum)"
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Compliance Guide, A. Guide Computations for Holiday Pay, Premium Pay, Overtime Pay, and Night Shift Differential, pp. 2-3",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 3 Premium Pay, D. Premium Pay Rates, pp. 21-22",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 4 Overtime Pay, C. Overtime Pay Rates, p. 23",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 2 Holiday Pay, D. Holiday Pay Rates, pp. 17-18",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 5 Night Shift Differential, A. Definition and C. Night Shift Differential Rate, pp. 25-26",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 1, C.5 Meal and Rest Periods (not less than one hour time-off for regular meals), p. 9",
+    "Rounding to the centavo: convention stated in the prompt (the Handbook gives no rounding rule)"
   ],
   "reference_inputs": {
     "kind": "period",

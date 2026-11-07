@@ -2,7 +2,7 @@
   "id": "task_03",
   "title": "Small retail store: holiday pay exemption applies, night differential exemption does not",
   "difficulty": "hard",
-  "verified": false,
+  "verified": true,
   "tags": [
     "regular_holiday",
     "holiday_pay_exemption",
@@ -23,10 +23,14 @@
     "counted_meal_break_as_hours_worked"
   ],
   "source_refs": [
-    "TODO(verify): DOLE-BWC Handbook — section/page for holiday pay coverage and exemptions (retail/service < 10 workers)",
-    "TODO(verify): DOLE-BWC Handbook — section/page for night shift differential coverage and exemptions (retail/service <= 5 workers)",
-    "TODO(verify): DOLE-BWC Handbook — section/page for overtime on an ordinary day",
-    "TODO(verify): DOLE-BWC Handbook — section/page for night shift differential"
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Compliance Guide table (Holiday Pay N/A for retail & service employing 1-9 workers; Night Shift Differential N/A only for 1-5 workers), p. 1",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 2 Holiday Pay, B. Coverage (retail and service establishments regularly employing less than ten workers), p. 16",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 5 Night Shift Differential, B. Coverage (retail and service establishments regularly employing not more than five workers), p. 25",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 2 Holiday Pay, D. Holiday Pay Rates, pp. 17-18",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 4 Overtime Pay, C. Overtime Pay Rates, p. 23",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 5 Night Shift Differential, A. Definition and C. Night Shift Differential Rate, pp. 25-26",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Compliance Guide, A. Guide Computations for Holiday Pay, Premium Pay, Overtime Pay, and Night Shift Differential, pp. 2-3",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 1, C.5 Meal and Rest Periods (not less than one hour time-off for regular meals), p. 9"
   ],
   "reference_inputs": {
     "kind": "day",

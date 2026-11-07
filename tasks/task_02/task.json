@@ -2,7 +2,7 @@
   "id": "task_02",
   "title": "Monthly-paid employee: overtime and night hours on a special non-working day",
   "difficulty": "medium",
-  "verified": false,
+  "verified": true,
   "tags": [
     "monthly_paid",
     "days_factor",
@@ -11,7 +11,7 @@
     "night_shift",
     "meal_break"
   ],
-  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- A monthly-paid employee's daily rate = (monthly rate × 12) ÷ days factor.\n  Use the days factor given in the scenario. Round the daily rate to the\n  nearest centavo before using it.\n- Hourly rate = daily rate ÷ 8.\n- Work on a special non-working day is paid an additional 30% of the daily\n  rate for the first 8 hours (130%).\n- Overtime work (beyond 8 hours) on a special non-working day is paid an\n  additional 30% of the hourly rate on said day.\n- Night shift differential: an additional 10% of the hourly rate for\n  each hour worked between 10:00 PM and 6:00 AM. If the hour is also\n  holiday, rest day, or overtime work, the 10% is computed on the\n  applicable hourly rate for that hour.\n- Meal breaks of 1 hour are unpaid and not counted as hours worked.\n\nSCENARIO:\nJose is a rank-and-file accounting clerk at a logistics company with 120\nemployees. He is paid a monthly salary of ₱25,000. He works a 5-day week,\nand his employer uses a days factor of 261 days per year. August 21 is a\nspecial non-working day and is not his rest day. On August 21, he worked\nfrom 2:00 PM to 12:00 midnight, with an unpaid 1-hour meal break from\n6:00 PM to 7:00 PM.\n\nQUESTION:\nUsing his daily rate and the rules above, compute Jose's total pay for the\nhours he worked on August 21.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- Daily rate = (monthly salary × 12) ÷ days factor. Use the days factor\n  given in the scenario. Round the daily rate to the\n  nearest centavo before using it.\n- Hourly rate = daily rate ÷ 8.\n- Work on a special non-working day is paid an additional 30% of the daily\n  rate for the first 8 hours (130%).\n- Overtime work (beyond 8 hours) on a special non-working day is paid an\n  additional 30% of the hourly rate on said day.\n- Night shift differential: an additional 10% of the hourly rate for\n  each hour worked between 10:00 PM and 6:00 AM. If the hour is also\n  holiday, rest day, or overtime work, the 10% is computed on the\n  applicable hourly rate for that hour.\n- Meal breaks of 1 hour are unpaid and not counted as hours worked.\n\nSCENARIO:\nJose is a rank-and-file accounting clerk at a logistics company with 120\nemployees. He is paid a monthly salary of ₱25,000. He works a 5-day week,\nand his employer uses a days factor of 261 days per year. August 21 is a\nspecial non-working day and is not his rest day. On August 21, he worked\nfrom 2:00 PM to 12:00 midnight, with an unpaid 1-hour meal break from\n6:00 PM to 7:00 PM.\n\nQUESTION:\nUsing his daily rate and the rules above, compute Jose's total pay for the\nhours he worked on August 21.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
   "expected_answer": 1780.04,
   "tolerance": 0.01,
   "failure_categories": [
@@ -23,10 +23,13 @@
     "counted_meal_break_as_hours_worked"
   ],
   "source_refs": [
-    "TODO(verify): DOLE-BWC Handbook — section/page for computing the daily rate of monthly-paid employees (days factor)",
-    "TODO(verify): DOLE-BWC Handbook — section/page for work on a special non-working day",
-    "TODO(verify): DOLE-BWC Handbook — section/page for overtime on a special non-working day",
-    "TODO(verify): DOLE-BWC Handbook — section/page for night shift differential"
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 1, E. Computation of the EEMR (EEMR = daily rate x factor / 12; factor 261 for employees not paid on Saturdays and Sundays or rest days), pp. 9-11",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 3 Premium Pay, D. Premium Pay Rates (special non-working day 130%), pp. 21-22",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 4 Overtime Pay, C. Overtime Pay Rates (special day OT +30% of the hourly rate on said day), p. 23",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 5 Night Shift Differential, A. Definition and C. Rate, pp. 25-26",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Compliance Guide, A. Guide Computations (special day night OT 1.3 x 1.1 x 1.3 = 1.859), pp. 2-3",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 1, C.5 Meal and Rest Periods, p. 9",
+    "Rounding the daily rate to the centavo: convention stated in the prompt (the Handbook gives no rounding rule)"
   ],
   "reference_inputs": {
     "kind": "day",

@@ -2,7 +2,7 @@
   "id": "task_01",
   "title": "Regular holiday on rest day with overtime and night shift differential",
   "difficulty": "medium",
-  "verified": false,
+  "verified": true,
   "tags": [
     "regular_holiday",
     "rest_day",
@@ -22,9 +22,12 @@
     "misidentified_night_hours"
   ],
   "source_refs": [
-    "TODO(verify): DOLE-BWC Handbook on Workers' Statutory Monetary Benefits — section/page for regular holiday + rest day pay",
-    "TODO(verify): DOLE-BWC Handbook — section/page for overtime on a regular holiday falling on a rest day",
-    "TODO(verify): DOLE-BWC Handbook — section/page for night shift differential"
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Compliance Guide, A. Guide Computations for Holiday Pay, Premium Pay, Overtime Pay, and Night Shift Differential, pp. 2-3",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 1, C. Rules in Determining Compensable Working Hours (normal working hours of eight hours a day), p. 7",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 3 Premium Pay, D. Premium Pay Rates, pp. 21-22",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 4 Overtime Pay, C. Overtime Pay Rates, p. 23",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 5 Night Shift Differential, A. Definition and C. Night Shift Differential Rate, pp. 25-26",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 1, C.5 Meal and Rest Periods (not less than one hour time-off for regular meals), p. 9"
   ],
   "reference_inputs": {
     "daily_rate": 640,

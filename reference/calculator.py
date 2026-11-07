@@ -2,7 +2,7 @@
 
 Every rule below comes ONLY from the rules the author supplied in the project
 brief. Nothing here is taken from memory of the Labor Code. Each rule's
-constants carry a "# VERIFY:" comment so the author can check them against the
+constants carry a "# SOURCE:" comment citing the
 DOLE-BWC Handbook on Workers' Statutory Monetary Benefits. Anything the
 supplied rules do not cover raises NotImplementedError instead of guessing.
 
@@ -41,12 +41,12 @@ CENTAVO = Decimal("0.01")
 # =============================================================================
 
 # --- Hourly rate --------------------------------------------------------------
-# VERIFY: DOLE-BWC Handbook, section ___, p. ___
+# SOURCE: DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Ed., Ch. 1 C (8-hour normal day), p. 7; Ch. 4 C ("hourly rate of the basic wage"), p. 23
 HOURS_PER_DAY = Decimal(8)          # Hourly rate = daily rate / 8
 NORMAL_MINUTES = 8 * 60             # first 8 hours worked are "regular" hours
 
 # --- Day-type multipliers for the first 8 hours ------------------------------------
-# VERIFY: DOLE-BWC Handbook, section ___, p. ___
+# SOURCE: DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Ed., Compliance Guide A (table of rates), p. 2; Ch. 2 D, pp. 17-18; Ch. 3 D, pp. 21-22
 DAY_MULTIPLIERS = {
     "ordinary": Decimal("1.00"),
     "rest_day": Decimal("1.30"),
@@ -62,18 +62,19 @@ REGULAR_HOLIDAY_TYPES = {"regular_holiday", "regular_holiday_rest_day",
 SPECIAL_DAY_TYPES = {"special_non_working", "special_non_working_rest_day"}
 
 # --- Overtime ----------------------------------------------------------------------
-# VERIFY: DOLE-BWC Handbook, section ___, p. ___
+# SOURCE: DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Ed., Ch. 4 C. Overtime Pay Rates, p. 23; Compliance Guide A, pp. 2-3
 OT_FACTOR_ORDINARY = Decimal("1.25")     # ordinary day: hourly x 125%
 OT_FACTOR_PREMIUM_DAY = Decimal("1.30")  # rest day / holiday: (hourly x day mult) x 130%
 
 # --- Night shift differential ---------------------------------------------------------
-# VERIFY: DOLE-BWC Handbook, section ___, p. ___
+# SOURCE: DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Ed., Ch. 5 A and C, pp. 25-26; Compliance Guide A (premiums multiply), pp. 2-3
 NIGHT_FACTOR = Decimal("1.10")           # x 110% on the applicable hourly rate for that hour
 NIGHT_START_MINUTE = 22 * 60             # 10:00 PM
 NIGHT_END_MINUTE = 6 * 60                # 6:00 AM
 
 # --- D1. Monthly-paid employee -> daily rate ---------------------------------------
-# VERIFY: DOLE-BWC Handbook, section ___, p. ___
+# SOURCE: DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Ed., Ch. 1 D-E (EEMR = daily rate x factor / 12; factors 365, 313, 261), pp. 9-11.
+# NOTE: the Handbook lists 313 and 261 under DAILY-paid employees and uses 365 for monthly-paid.
 # daily_rate = (monthly_rate x 12) / days_factor. days_factor (e.g. 313, 261, 365) is
 # GIVEN by each task; the calculator never chooses it.
 MONTHS_PER_YEAR = 12
@@ -82,7 +83,10 @@ MONTHS_PER_YEAR = 12
 ROUND_DAILY_RATE = True
 
 # --- D2. Holiday pay coverage exemption -------------------------------------------------
-# VERIFY: DOLE-BWC Handbook, section ___, p. ___
+# SOURCE: DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Ed., Ch. 2 B. Coverage, pp. 16-17; Compliance Guide table, p. 1.
+# NOTE: the Handbook also excludes managerial employees and field personnel from premium pay,
+# overtime (Ch. 3 B, Ch. 4 B, pp. 20-23) and NSD (Ch. 5 B, pp. 25-26). This calculator only applies
+# the holiday-pay exclusion to them; no task uses those categories.
 # Retail and service establishments regularly employing LESS THAN 10 workers are
 # exempt; managerial employees and field personnel are exempt.
 HOLIDAY_EXEMPT_ESTABLISHMENT_TYPES = {"retail", "service"}
@@ -90,13 +94,13 @@ HOLIDAY_EXEMPT_IF_WORKERS_LESS_THAN = 10
 HOLIDAY_EXEMPT_EMPLOYEE_CATEGORIES = {"managerial", "field_personnel"}
 
 # --- D3. Night shift differential exemption ---------------------------------------------
-# VERIFY: DOLE-BWC Handbook, section ___, p. ___
+# SOURCE: DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Ed., Ch. 5 B. Coverage, p. 25; Compliance Guide table, p. 1
 # Retail and service establishments regularly employing NOT MORE THAN 5 workers are exempt.
 NSD_EXEMPT_ESTABLISHMENT_TYPES = {"retail", "service"}
 NSD_EXEMPT_IF_WORKERS_AT_MOST = 5
 
 # --- D4. Unworked regular holiday ---------------------------------------------------------
-# VERIFY: DOLE-BWC Handbook, section ___, p. ___
+# SOURCE: DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Ed., Ch. 2 D. Holiday Pay Rates, p. 17, and E. Absences (items 1 and 3), p. 18
 # Covered employees get 100% of the daily rate if present, or on leave with pay, on the
 # workday immediately preceding the holiday. If the day immediately preceding is a
 # non-working day or rest day, look at the workday immediately before THAT day.
@@ -105,13 +109,14 @@ ATTENDANCE_THAT_QUALIFIES = {"present", "paid_leave"}
 ATTENDANCE_VALUES = {"present", "paid_leave", "absent_unpaid"}
 
 # --- D5. Multi-day (period) payroll --------------------------------------------------------
-# VERIFY: confirm the rounding practice.
+# SOURCE: none - the Handbook gives no rounding rule. This is a convention stated in each prompt.
 # "per_day":    round each day's pay to centavos, then add the days up.
 # "per_period": add up the exact day amounts, then round the total once.
 ROUNDING_MODE = "per_day"
 
 # --- D6. Separation pay (authorized causes) -----------------------------------------------
-# VERIFY: DOLE-BWC Handbook, section ___, p. ___
+# SOURCE: DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Ed., Ch. 14 C. Amount, pp. 45-46. NOTE: "closure due to serious losses = 0" is not
+# stated in the Handbook (it only lists the causes that DO get separation pay); no task uses it.
 # A fraction of AT LEAST 6 months counts as one whole year of service.
 SEPARATION_FRACTION_MONTHS_FOR_FULL_YEAR = 6
 # Per year of service, as a fraction of one month's pay. Minimum is always 1 month pay.

@@ -3,6 +3,7 @@
 Reads results/raw/**/trial_*.json and writes:
   results/summary.md     (paste into the README)
   results/pass_rate.png  (bar chart: overall pass rate per model)
+  results/tasks_table.md (every task: id, title, difficulty, tags, verified)
 
 Metrics:
   pass rate  = passed trials / all graded trials
@@ -34,6 +35,7 @@ ROOT = Path(__file__).resolve().parent
 RAW_DIR = ROOT / "results" / "raw"
 SUMMARY_MD = ROOT / "results" / "summary.md"
 CHART_PNG = ROOT / "results" / "pass_rate.png"
+TASKS_MD = ROOT / "results" / "tasks_table.md"
 
 
 def load_trials(tasks):
@@ -170,6 +172,23 @@ def write_markdown(models, task_ids, task_meta, stats, by_model_task):
     SUMMARY_MD.write_text("\n".join(out), encoding="utf-8")
 
 
+def write_tasks_table(tasks):
+    """results/tasks_table.md: one row per task (drafts included), linked from the README."""
+    out = ["# Tasks", "",
+           f"{len(tasks)} task(s), {sum(t['verified'] for t in tasks)} verified against the "
+           "DOLE-BWC Handbook. Draft tasks are left out of reported results unless "
+           "`--include-drafts` is used.", "",
+           "| ID | Title | Difficulty | Tags | Verified |",
+           "|---|---|---|---|---|"]
+    for t in tasks:
+        tags = ", ".join(f"`{tag}`" for tag in t["tags"])
+        verified = "yes" if t["verified"] else "no (DRAFT)"
+        out.append(f"| [{t['id']}](../tasks/{t['id']}/task.json) | {t['title']} "
+                   f"| {t['difficulty']} | {tags} | {verified} |")
+    TASKS_MD.parent.mkdir(parents=True, exist_ok=True)
+    TASKS_MD.write_text("\n".join(out) + "\n", encoding="utf-8")
+
+
 def write_chart(models, stats, has_drafts=False):
     """Horizontal bar chart (model names are long), sorted best -> worst, labelled values."""
     rows = sorted(((100 * stats[m]["passed"] / stats[m]["total"], m) for m in models), reverse=True)
@@ -185,7 +204,7 @@ def write_chart(models, stats, has_drafts=False):
     ax.invert_yaxis()  # best model on top
     ax.set_xlim(0, 100)
     ax.set_xlabel("Pass rate (% of trials)", color=ink_muted)
-    title = "PH payroll eval: overall pass rate by model"
+    title = "TamangSahod: overall pass rate by model"
     if has_drafts:
         title += "  (includes DRAFT tasks)"
     ax.set_title(title, color=ink, loc="left", fontsize=12)
@@ -210,6 +229,8 @@ def main():
     args = p.parse_args()
 
     tasks = load_tasks("all")
+    write_tasks_table(tasks)              # always lists ALL tasks, with their verified flag
+    print(f"Wrote {TASKS_MD.relative_to(ROOT)}\n")
     trials, ignored = load_trials(tasks)  # stale check uses ALL tasks, drafts included
 
     # Verification gate: leave draft tasks out unless asked for.

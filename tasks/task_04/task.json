@@ -2,7 +2,7 @@
   "id": "task_04",
   "title": "Unworked regular holiday after a rest day, absent on the last workday before it",
   "difficulty": "hard",
-  "verified": false,
+  "verified": true,
   "tags": [
     "regular_holiday",
     "unworked_holiday",
@@ -20,8 +20,10 @@
     "paid_unworked_rest_day"
   ],
   "source_refs": [
-    "TODO(verify): DOLE-BWC Handbook — section/page for holiday pay eligibility (present or on paid leave on the preceding workday)",
-    "TODO(verify): DOLE-BWC Handbook — section/page for the rule when the day before the holiday is a rest/non-working day"
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 2 Holiday Pay, D. Holiday Pay Rates, pp. 17-18",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 2 Holiday Pay, E. Absences (items 1 and 3), p. 18",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 1, D. Monthly-Paid Employees and Daily-Paid Employees (daily-paid: paid on days actually worked and on unworked regular holidays), p. 9",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 1, C.5 Meal and Rest Periods (not less than one hour time-off for regular meals), p. 9"
   ],
   "reference_inputs": {
     "kind": "period",

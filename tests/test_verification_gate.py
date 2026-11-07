@@ -86,8 +86,17 @@ def test_oracle_still_checks_draft_answers():
 
 # --- run_eval gate ------------------------------------------------------------------
 
+def only_draft_task(*_args, **_kwargs):
+    """Stand-in for load_tasks(): one task, forced to be a draft.
+
+    The gate tests must not depend on whether the real task_01 is verified yet.
+    """
+    return [dict(TASK, verified=False)]
+
+
 @pytest.fixture
 def fake_api(tmp_path, monkeypatch):
+    monkeypatch.setattr(run_eval, "load_tasks", only_draft_task)
     monkeypatch.setattr(run_eval, "ROOT", tmp_path)
     monkeypatch.setattr(run_eval, "RAW_DIR", tmp_path / "results" / "raw")
     monkeypatch.setattr(run_eval, "STALE_DIR", tmp_path / "results" / "stale")
@@ -127,10 +136,12 @@ def test_run_eval_runs_drafts_when_asked(fake_api, monkeypatch):
 
 @pytest.fixture
 def report_sandbox(tmp_path, monkeypatch):
+    monkeypatch.setattr(report, "load_tasks", only_draft_task)
     monkeypatch.setattr(report, "ROOT", tmp_path)
     monkeypatch.setattr(report, "RAW_DIR", tmp_path / "results" / "raw")
     monkeypatch.setattr(report, "SUMMARY_MD", tmp_path / "results" / "summary.md")
     monkeypatch.setattr(report, "CHART_PNG", tmp_path / "results" / "pass_rate.png")
+    monkeypatch.setattr(report, "TASKS_MD", tmp_path / "results" / "tasks_table.md")
     trial = tmp_path / "results" / "raw" / "m" / "task_01" / "trial_1.json"
     trial.parent.mkdir(parents=True)
     trial.write_text(json.dumps({"task_id": "task_01", "model": "m", "prompt": TASK["prompt"],
@@ -150,3 +161,12 @@ def test_report_marks_drafts_when_included(report_sandbox, monkeypatch):
     md = (report_sandbox / "results" / "summary.md").read_text(encoding="utf-8")
     assert "DRAFT RESULTS INCLUDED" in md
     assert "task_01 (DRAFT)" in md
+
+
+def test_tasks_table_lists_drafts_even_with_no_reportable_trials(report_sandbox, monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["report.py"])
+    with pytest.raises(SystemExit):
+        report.main()  # no verified tasks -> nothing to report...
+    table = (report_sandbox / "results" / "tasks_table.md").read_text(encoding="utf-8")
+    assert "| [task_01](../tasks/task_01/task.json) |" in table  # ...but the table is still written
+    assert "no (DRAFT)" in table

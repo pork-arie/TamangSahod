@@ -2,7 +2,7 @@
   "id": "task_08",
   "title": "Separation pay for retrenchment: a 5-month fraction does not count",
   "difficulty": "hard",
-  "verified": false,
+  "verified": true,
   "tags": [
     "separation_pay",
     "retrenchment",
@@ -17,8 +17,8 @@
     "wrong_years_of_service"
   ],
   "source_refs": [
-    "TODO(verify): DOLE-BWC Handbook — section/page for separation pay (authorized causes)",
-    "TODO(verify): DOLE-BWC Handbook — section/page for the 'fraction of at least 6 months = 1 year' rule"
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 14 Separation Pay, C. Amount (1/2 month or one month pay per year of service; fraction of at least six months = one whole year; not less than one month), pp. 45-46",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 14 Separation Pay, D. Computation (latest salary rate; regular allowances included - the scenario states there are none), p. 46"
   ],
   "reference_inputs": {
     "kind": "separation",

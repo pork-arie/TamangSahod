@@ -7,6 +7,7 @@ results/*
 !results/sample/**
 !results/summary.md
 !results/pass_rate.png
+!results/tasks_table.md
 
 # Python
 __pycache__/
@@ -17,3 +18,6 @@ venv/
 
 # Build output (make_submission.py)
 submission.zip
+
+# Reference PDF (copyrighted; cite it, do not redistribute)
+*.pdf
