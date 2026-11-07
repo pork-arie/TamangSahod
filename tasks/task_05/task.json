@@ -1,0 +1,136 @@
+{
+  "id": "task_05",
+  "title": "Full week: rest day with overtime, unworked special day, regular holiday with night hours",
+  "difficulty": "hard",
+  "verified": false,
+  "tags": [
+    "weekly_payroll",
+    "rest_day",
+    "overtime",
+    "special_non_working_day",
+    "unworked_day",
+    "regular_holiday",
+    "night_shift",
+    "meal_break",
+    "rounding"
+  ],
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- Hourly rate = daily rate ÷ 8.\n- An ordinary working day of 8 hours is paid 100% of the daily rate.\n- Work on the employee's scheduled rest day is paid an additional 30% of\n  the daily rate for the first 8 hours (130%).\n- Overtime work (beyond 8 hours) on a rest day is paid an additional 30% of\n  the hourly rate on said day.\n- Work on a regular holiday is paid 200% of the daily rate for the first\n  8 hours.\n- Unworked special non-working day: no work, no pay (the company has no\n  policy or CBA granting pay for it).\n- Night shift differential: an additional 10% of the hourly rate for\n  each hour worked between 10:00 PM and 6:00 AM. If the hour is also\n  holiday, rest day, or overtime work, the 10% is computed on the\n  applicable hourly rate for that hour.\n- Meal breaks of 1 hour are unpaid and not counted as hours worked.\n- Round each day's pay to the nearest centavo, then add the days.\n\nSCENARIO:\nAna is a rank-and-file production worker at a food manufacturing company\nwith 60 employees. Her daily rate is ₱645. Her scheduled rest day is\nSaturday; she works the other six days. This week:\n- Monday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Tuesday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Wednesday: a special non-working day; she did not work.\n- Thursday: a regular holiday (not her rest day); she worked 2:00 PM to\n  11:00 PM, unpaid meal break 6:00 PM to 7:00 PM.\n- Friday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Saturday: her rest day; she worked 8:00 AM to 7:00 PM, unpaid meal break\n  12:00 noon to 1:00 PM.\n- Sunday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n\nQUESTION:\nCompute Ana's total pay for the week (Monday to Sunday).\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "expected_answer": 4997.14,
+  "tolerance": 0.01,
+  "failure_categories": [
+    "paid_unworked_special_day",
+    "counted_meal_break_as_hours_worked",
+    "missed_rest_day_overtime_premium",
+    "missed_night_differential",
+    "wrong_holiday_multiplier",
+    "rounding_error"
+  ],
+  "source_refs": [
+    "TODO(verify): DOLE-BWC Handbook — section/page for rest day premium and overtime on a rest day",
+    "TODO(verify): DOLE-BWC Handbook — section/page for work on a regular holiday",
+    "TODO(verify): DOLE-BWC Handbook — section/page for unworked special non-working day (no work, no pay)",
+    "TODO(verify): DOLE-BWC Handbook — section/page for night shift differential",
+    "TODO(verify): rounding practice (round each day, then sum)"
+  ],
+  "reference_inputs": {
+    "kind": "period",
+    "daily_rate": 645,
+    "days": [
+      {
+        "label": "Mon",
+        "day_type": "ordinary",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "17:00"
+          ]
+        ]
+      },
+      {
+        "label": "Tue",
+        "day_type": "ordinary",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "17:00"
+          ]
+        ]
+      },
+      {
+        "label": "Wed",
+        "day_type": "special_non_working",
+        "worked": false
+      },
+      {
+        "label": "Thu",
+        "day_type": "regular_holiday",
+        "worked": true,
+        "intervals": [
+          [
+            "14:00",
+            "18:00"
+          ],
+          [
+            "19:00",
+            "23:00"
+          ]
+        ]
+      },
+      {
+        "label": "Fri",
+        "day_type": "ordinary",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "17:00"
+          ]
+        ]
+      },
+      {
+        "label": "Sat",
+        "day_type": "rest_day",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "19:00"
+          ]
+        ]
+      },
+      {
+        "label": "Sun",
+        "day_type": "ordinary",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "17:00"
+          ]
+        ]
+      }
+    ]
+  }
+}

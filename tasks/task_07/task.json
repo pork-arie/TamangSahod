@@ -1,0 +1,31 @@
+{
+  "id": "task_07",
+  "title": "Separation pay for retrenchment with short service: the one-month minimum applies",
+  "difficulty": "hard",
+  "verified": false,
+  "tags": [
+    "separation_pay",
+    "retrenchment",
+    "minimum_separation_pay",
+    "years_of_service_fraction"
+  ],
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- Separation pay for redundancy: the greater of one month pay, or one\n  month pay for every year of service.\n- Separation pay for retrenchment to prevent losses: the greater of one\n  month pay, or one-half month pay for every year of service.\n- One-half month pay = monthly rate ÷ 2.\n- In computing years of service, a fraction of at least 6 months is\n  considered one whole year. A fraction of less than 6 months is not counted.\n- \"One month pay\" is the monthly rate given below; no other pay\n  components are included.\n\nSCENARIO:\nBea is a rank-and-file sales coordinator. She was hired on July 1, 2024.\nHer employer retrenched employees to prevent losses, and her last day of\nwork was September 30, 2025, giving her 1 year and 3 months of service.\nHer monthly rate is ₱27,400.\n\nQUESTION:\nCompute Bea's separation pay.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "expected_answer": 27400.0,
+  "tolerance": 0.01,
+  "failure_categories": [
+    "ignored_one_month_minimum",
+    "used_full_month_for_retrenchment",
+    "wrong_years_of_service"
+  ],
+  "source_refs": [
+    "TODO(verify): DOLE-BWC Handbook — section/page for separation pay (authorized causes)",
+    "TODO(verify): DOLE-BWC Handbook — section/page for the 'fraction of at least 6 months = 1 year' rule"
+  ],
+  "reference_inputs": {
+    "kind": "separation",
+    "monthly_rate": 27400,
+    "start_date": "2024-07-01",
+    "end_date": "2025-09-30",
+    "cause": "retrenchment"
+  }
+}

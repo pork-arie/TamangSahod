@@ -1,0 +1,47 @@
+{
+  "id": "task_02",
+  "title": "Monthly-paid employee: overtime and night hours on a special non-working day",
+  "difficulty": "medium",
+  "verified": false,
+  "tags": [
+    "monthly_paid",
+    "days_factor",
+    "special_non_working_day",
+    "overtime",
+    "night_shift",
+    "meal_break"
+  ],
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- A monthly-paid employee's daily rate = (monthly rate × 12) ÷ days factor.\n  Use the days factor given in the scenario. Round the daily rate to the\n  nearest centavo before using it.\n- Hourly rate = daily rate ÷ 8.\n- Work on a special non-working day is paid an additional 30% of the daily\n  rate for the first 8 hours (130%).\n- Overtime work (beyond 8 hours) on a special non-working day is paid an\n  additional 30% of the hourly rate on said day.\n- Night shift differential: an additional 10% of the hourly rate for\n  each hour worked between 10:00 PM and 6:00 AM. If the hour is also\n  holiday, rest day, or overtime work, the 10% is computed on the\n  applicable hourly rate for that hour.\n- Meal breaks of 1 hour are unpaid and not counted as hours worked.\n\nSCENARIO:\nJose is a rank-and-file accounting clerk at a logistics company with 120\nemployees. He is paid a monthly salary of ₱25,000. He works a 5-day week,\nand his employer uses a days factor of 261 days per year. August 21 is a\nspecial non-working day and is not his rest day. On August 21, he worked\nfrom 2:00 PM to 12:00 midnight, with an unpaid 1-hour meal break from\n6:00 PM to 7:00 PM.\n\nQUESTION:\nUsing his daily rate and the rules above, compute Jose's total pay for the\nhours he worked on August 21.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "expected_answer": 1780.04,
+  "tolerance": 0.01,
+  "failure_categories": [
+    "wrong_days_factor",
+    "did_not_derive_daily_rate_from_monthly",
+    "treated_special_day_as_ordinary",
+    "wrong_overtime_factor_on_special_day",
+    "missed_night_differential",
+    "counted_meal_break_as_hours_worked"
+  ],
+  "source_refs": [
+    "TODO(verify): DOLE-BWC Handbook — section/page for computing the daily rate of monthly-paid employees (days factor)",
+    "TODO(verify): DOLE-BWC Handbook — section/page for work on a special non-working day",
+    "TODO(verify): DOLE-BWC Handbook — section/page for overtime on a special non-working day",
+    "TODO(verify): DOLE-BWC Handbook — section/page for night shift differential"
+  ],
+  "reference_inputs": {
+    "kind": "day",
+    "monthly_rate": 25000,
+    "days_factor": 261,
+    "day_type": "special_non_working",
+    "intervals": [
+      [
+        "14:00",
+        "18:00"
+      ],
+      [
+        "19:00",
+        "24:00"
+      ]
+    ]
+  }
+}

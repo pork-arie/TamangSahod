@@ -1,0 +1,71 @@
+{
+  "id": "task_04",
+  "title": "Unworked regular holiday after a rest day, absent on the last workday before it",
+  "difficulty": "hard",
+  "verified": false,
+  "tags": [
+    "regular_holiday",
+    "unworked_holiday",
+    "holiday_pay_eligibility",
+    "rest_day",
+    "absence"
+  ],
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- An ordinary working day of 8 hours is paid 100% of the daily rate.\n- Unworked regular holiday: a covered employee is entitled to 100% of the\n  daily rate if present, or on leave of absence with pay, on the workday\n  immediately preceding the regular holiday. If the day immediately\n  preceding the holiday is a non-working day or rest day, the employee must\n  have been present or on paid leave on the workday immediately before that\n  non-working day or rest day.\n- Meal breaks of 1 hour are unpaid and not counted as hours worked.\n\nSCENARIO:\nRamon is a rank-and-file warehouse helper at a manufacturing company with\n80 employees; he is covered by the holiday pay rules. His daily rate is\n₱595. He is paid only for days he actually works, except where a rule above\ngives pay for an unworked day. His workdays are Monday to Saturday and his\nrest day is Sunday.\n- Friday: he worked 8:00 AM to 5:00 PM with an unpaid meal break from\n  12:00 noon to 1:00 PM.\n- Saturday: he was absent without pay (no approved leave).\n- Sunday: his rest day; he did not work.\n- Monday: a regular holiday; he did not work.\n\nQUESTION:\nCompute Ramon's total pay for Friday through Monday (4 days).\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "expected_answer": 595.0,
+  "tolerance": 0.01,
+  "failure_categories": [
+    "checked_wrong_day_for_holiday_eligibility",
+    "skipped_back_past_absence",
+    "paid_unworked_holiday_at_200_percent",
+    "paid_unworked_rest_day"
+  ],
+  "source_refs": [
+    "TODO(verify): DOLE-BWC Handbook — section/page for holiday pay eligibility (present or on paid leave on the preceding workday)",
+    "TODO(verify): DOLE-BWC Handbook — section/page for the rule when the day before the holiday is a rest/non-working day"
+  ],
+  "reference_inputs": {
+    "kind": "period",
+    "daily_rate": 595,
+    "days": [
+      {
+        "label": "Fri",
+        "day_type": "ordinary",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "17:00"
+          ]
+        ]
+      },
+      {
+        "label": "Sat",
+        "day_type": "ordinary",
+        "worked": false
+      },
+      {
+        "label": "Sun",
+        "day_type": "rest_day",
+        "worked": false
+      },
+      {
+        "label": "Mon",
+        "day_type": "regular_holiday",
+        "worked": false,
+        "preceding_days": [
+          {
+            "kind": "rest_day"
+          },
+          {
+            "kind": "workday",
+            "attendance": "absent_unpaid"
+          }
+        ]
+      }
+    ]
+  }
+}
