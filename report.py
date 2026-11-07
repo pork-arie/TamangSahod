@@ -203,7 +203,7 @@ def write_chart(models, stats, has_drafts=False):
 
 
 def main():
-    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore  # so ₱ prints on Windows; Pylance thinks stdout lacks reconfigure()
     p = argparse.ArgumentParser(description="Summarise saved trials into tables and a chart.")
     p.add_argument("--include-drafts", action="store_true",
                    help="also report draft tasks (verified=false), marked DRAFT")

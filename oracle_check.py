@@ -61,7 +61,7 @@ def check_task(task):
 
 
 def main():
-    sys.stdout.reconfigure(encoding="utf-8")  # so ₱ prints on Windows consoles too
+    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore  # so ₱ prints on Windows; Pylance thinks stdout lacks reconfigure()
     tasks = load_tasks("all")
     all_ok = True
     for task in tasks:

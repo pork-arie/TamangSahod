@@ -234,7 +234,7 @@ def parse_args(cfg):
 
 
 def main():
-    sys.stdout.reconfigure(encoding="utf-8")  # so ₱ prints on Windows consoles too
+    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore  # so ₱ prints on Windows; Pylance thinks stdout lacks reconfigure()
     cfg = load_config()
     args = parse_args(cfg)
     tasks = load_tasks(args.tasks)

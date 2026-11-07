@@ -22,7 +22,7 @@ from tasks import load_tasks, prompt_sha256, saved_prompt_sha256
 
 
 def main():
-    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore  # so ₱ prints on Windows; Pylance thinks stdout lacks reconfigure()
     p = argparse.ArgumentParser(description="Re-grade saved trials with the current grader.")
     p.add_argument("--dry-run", action="store_true", help="show changes without writing files")
     args = p.parse_args()

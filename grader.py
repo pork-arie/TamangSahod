@@ -134,6 +134,6 @@ if __name__ == "__main__":
     # Quick manual use: python grader.py 2258.88 < response.txt
     import sys
 
-    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore  # so ₱ prints on Windows; Pylance thinks stdout lacks reconfigure()
     text = sys.stdin.read()
     print(grade(text, sys.argv[1]))
