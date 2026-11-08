@@ -40,7 +40,78 @@ def test_every_task_has_a_valid_closed_prompt(task):
     assert "SCENARIO:" in closed_p and "QUESTION:" in closed_p
     assert closed_p.rstrip().endswith("FINAL ANSWER: ₱<amount with 2 decimals>")
     assert len(closed_p) < len(task["prompt"])
+    assert "above" not in closed_p.lower()       # nothing points at rules that are not shown
+    for fact in task.get("closed_book_keep", []):
+        assert f"- {fact}" in closed_p
     assert oracle_check.check_task(task) == []   # includes the closed-prompt check
+
+
+# --- closed_book_keep / closed_book_replace ---------------------------------------------
+
+MINI = ("Intro line.\n\nRULES (x):\n- general law A\n- convention B\n\n"
+        "SCENARIO:\nPaid except where a rule above says so.\n\nQUESTION:\nq?\n\n"
+        "FINAL ANSWER: ₱<amount with 2 decimals>")
+
+
+def test_kept_facts_go_under_given_facts_just_before_scenario():
+    closed = closed_book_prompt(MINI, keep=["convention B"])
+    assert closed.startswith("Intro line.\n\nGIVEN FACTS:\n- convention B\n\nSCENARIO:\n")
+    assert "general law A" not in closed
+
+
+def test_no_given_facts_heading_when_nothing_is_kept():
+    assert "GIVEN FACTS" not in closed_book_prompt(MINI)
+
+
+def test_replace_applies_to_closed_prompt_only():
+    task = {"prompt": MINI, "closed_book_replace": {"a rule above": "the applicable rules"}}
+    assert "except where the applicable rules says so" in prompt_for(task, "closed")
+    assert prompt_for(task, "open") == MINI            # open prompt, and so its hash, unchanged
+
+
+def test_replace_text_must_exist_exactly_once():
+    with pytest.raises(ValueError, match="exactly once"):
+        closed_book_prompt(MINI, replace={"not in the prompt": "x"})
+
+
+def test_replace_never_touches_the_removed_rules_or_kept_facts():
+    # "convention B" sits inside RULES, which is cut before replacing, so it is "not found"
+    with pytest.raises(ValueError, match="exactly once"):
+        closed_book_prompt(MINI, replace={"convention B": "x"})
+
+
+def test_empty_kept_fact_is_rejected():
+    with pytest.raises(ValueError, match="non-empty"):
+        closed_book_prompt(MINI, keep=["  "])
+
+
+def test_load_tasks_validates_closed_book_fields(tmp_path):
+    folder = tmp_path / "task_x"
+    folder.mkdir()
+    base = {"id": "task_x", "title": "t", "difficulty": "easy", "tags": [], "verified": False,
+            "expected_answer": 1, "prompt": MINI}
+    for bad in ({"closed_book_keep": "one string"}, {"closed_book_replace": ["a", "b"]},
+                {"closed_book_replace": {"missing text": "x"}}):
+        (folder / "task.json").write_text(json.dumps({**base, **bad}), encoding="utf-8")
+        with pytest.raises(ValueError):
+            load_tasks("all", tasks_dir=tmp_path)
+
+
+def test_oracle_flags_above_and_missing_kept_fact():
+    task = dict(TASK)
+    task["closed_book_replace"] = {"Compute Maria": "Using the rules above, compute Maria"}
+    assert any("above" in p for p in oracle_check.check_task(task))
+    task = dict(TASK)
+    task["closed_book_keep"] = ["a fact"]
+    task_prompt_for = prompt_for(task, "closed")
+    assert "- a fact" in task_prompt_for and oracle_check.check_task(task) == []
+
+
+def test_closed_book_fields_do_not_change_open_hashes():
+    # The open prompt is task["prompt"] verbatim, whatever the closed_book_* fields say.
+    for task in ALL_TASKS:
+        bare = {k: v for k, v in task.items() if not k.startswith("closed_book_")}
+        assert prompt_sha256(prompt_for(task, "open")) == prompt_sha256(prompt_for(bare, "open"))
 
 
 def test_open_condition_is_the_prompt_unchanged():

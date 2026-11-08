@@ -9,7 +9,8 @@ For each task this runs five checks:
   4. Verification gate: a task marked "verified": true must have source_refs,
      and none of them may still contain "TODO".
   5. Closed-book prompt: removing the RULES section leaves a usable prompt
-     (no rules left; scenario, question and FINAL ANSWER format line kept).
+     (no rules left; no "above" pointing at missing rules; every closed_book_keep
+     fact present; scenario, question and FINAL ANSWER format line kept).
 
 Draft tasks (verified=false) get checks 1-3 and 5 too, so they are ready to verify.
 
@@ -59,7 +60,7 @@ def check_task(task):
         if todo_refs:
             problems.append(f"verified=true but {len(todo_refs)} source_ref(s) still contain TODO")
 
-    # 5. closed-book prompt is well formed
+    # 5. closed-book prompt is well formed and fair
     try:
         closed = prompt_for(task, "closed")
     except ValueError as e:
@@ -67,6 +68,12 @@ def check_task(task):
     else:
         if "RULES" in closed:
             problems.append("closed-book prompt still contains a RULES section")
+        if "above" in closed.lower():
+            problems.append("closed-book prompt says 'above' (refers to rules that are not shown); "
+                            "add a closed_book_replace entry")
+        for line in task.get("closed_book_keep", []):
+            if line not in closed:
+                problems.append(f"closed-book prompt is missing kept fact {line[:40]!r}...")
         for needed in ("SCENARIO:", "QUESTION:", "FINAL ANSWER: ₱<amount with 2 decimals>"):
             if needed not in closed:
                 problems.append(f"closed-book prompt lost {needed!r}")

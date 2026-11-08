@@ -5,6 +5,10 @@ Each task can be run in two CONDITIONS:
   closed  the same prompt with the "RULES (...)" section removed, so the model must
           know the Philippine rules itself. Scenario, question and the FINAL ANSWER
           format line are unchanged, and so is the expected answer.
+          Task-specific facts that are NOT general law (a days factor, a company policy,
+          a rounding convention) stay, under "GIVEN FACTS:" (task.json "closed_book_keep").
+          Wording that refers to the missing rules is fixed for the closed prompt only
+          (task.json "closed_book_replace").
 """
 
 import hashlib
@@ -20,11 +24,19 @@ RULES_MARKER = "RULES ("            # start of the rules section, e.g. "RULES (f
 SCENARIO_MARKER = "\nSCENARIO:"     # the rules section ends where the scenario starts
 
 
-def closed_book_prompt(prompt: str) -> str:
+GIVEN_FACTS_HEADING = "GIVEN FACTS:"
+
+
+def closed_book_prompt(prompt: str, keep=None, replace=None) -> str:
     """The prompt with its RULES section cut out (from "RULES (" up to "SCENARIO:").
 
-    Everything before the rules (the one-line intro) and everything from SCENARIO:
-    onwards is kept character for character.
+    keep     task.json "closed_book_keep": task-specific facts/conventions (not general law)
+             that must stay. They are put back under "GIVEN FACTS:" just before SCENARIO:.
+    replace  task.json "closed_book_replace": {old text: new text} for wording that only makes
+             sense when rules are shown (e.g. "a rule above"). Applied to the closed prompt only,
+             so the open prompt and its hash never change.
+
+    Everything else (the intro line, scenario, question, FINAL ANSWER line) is kept as is.
     """
     if prompt.count(RULES_MARKER) != 1:
         raise ValueError(f"prompt must contain exactly one {RULES_MARKER!r} section")
@@ -32,7 +44,20 @@ def closed_book_prompt(prompt: str) -> str:
     end = prompt.find(SCENARIO_MARKER, start)
     if end == -1:
         raise ValueError(f"prompt has no {SCENARIO_MARKER.strip()!r} after the rules section")
-    return prompt[:start] + prompt[end + 1:]  # +1 keeps "SCENARIO:" and drops one newline
+    intro, rest = prompt[:start], prompt[end + 1:]  # rest starts with "SCENARIO:"
+
+    for old, new in (replace or {}).items():
+        if rest.count(old) != 1:
+            raise ValueError(f"closed_book_replace text {old!r} must appear exactly once "
+                             f"after the rules section (found {rest.count(old)})")
+        rest = rest.replace(old, new)
+
+    if keep:
+        if not all(isinstance(line, str) and line.strip() for line in keep):
+            raise ValueError("closed_book_keep must be a list of non-empty strings")
+        facts = "\n".join(f"- {line}" for line in keep)
+        rest = f"{GIVEN_FACTS_HEADING}\n{facts}\n\n{rest}"
+    return intro + rest
 
 
 def prompt_for(task: dict, condition: str) -> str:
@@ -40,7 +65,8 @@ def prompt_for(task: dict, condition: str) -> str:
     if condition == "open":
         return task["prompt"]
     if condition == "closed":
-        return closed_book_prompt(task["prompt"])
+        return closed_book_prompt(task["prompt"], task.get("closed_book_keep"),
+                                  task.get("closed_book_replace"))
     raise ValueError(f"Unknown condition {condition!r}; choose from {CONDITIONS}")
 
 
@@ -81,8 +107,12 @@ def load_tasks(selection="all", tasks_dir=TASKS_DIR):
         if task["id"] != path.parent.name:
             raise ValueError(f"{path}: id {task['id']!r} must match folder name {path.parent.name!r}")
         task.setdefault("tolerance", 0.01)
+        if not isinstance(task.get("closed_book_keep", []), list):
+            raise ValueError(f"{path}: closed_book_keep must be a list of strings")
+        if not isinstance(task.get("closed_book_replace", {}), dict):
+            raise ValueError(f"{path}: closed_book_replace must be a {{old: new}} object")
         try:
-            closed_book_prompt(task["prompt"])  # every task must support the closed condition
+            prompt_for(task, "closed")  # every task must support the closed condition
         except ValueError as e:
             raise ValueError(f"{path}: cannot build the closed-book prompt: {e}") from None
         tasks.append(task)

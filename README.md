@@ -205,13 +205,20 @@ Every task can run in two conditions:
 
 - The expected answers, grader and calculator are the same for both conditions.
 - `tasks/__init__.py` builds the closed prompt by cutting from `RULES (` up to `SCENARIO:`.
-  `oracle_check.py` checks that this works for every task.
+- **Fairness:** the closed prompt removes general law only.
+  - Task-specific facts and conventions that are **not** law are put back under a
+    `GIVEN FACTS:` heading, listed in task.json `closed_book_keep`. Examples: the employer's
+    days factor, "the company has no policy or CBA", a rounding method, "no other pay
+    components".
+  - Wording that points at the missing rules (e.g. "a rule above") is rewritten for the
+    closed prompt only, via task.json `closed_book_replace`. Open prompts, and their hashes,
+    never change.
+- `oracle_check.py` (check 5) verifies every closed prompt: no rules left, no "above",
+  every kept fact present, and the scenario, question and `FINAL ANSWER` line intact.
 - Each trial records its `condition`, and its `prompt_sha256` is the hash of the prompt
   actually sent, so the two conditions resume and go stale independently.
 - `report.py` shows them side by side: an "Open vs closed book" table, one column per model
   per condition in the per-task, difficulty and tag tables, and paired bars in the chart.
-- Two prompts (task_04, task_09) contain the phrase "except where a rule above gives pay for
-  an unworked day". It is kept verbatim in the closed condition, where no rules are shown.
 
 ## Results
 

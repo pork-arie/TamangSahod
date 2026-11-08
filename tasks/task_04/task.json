@@ -11,6 +11,9 @@
     "absence"
   ],
   "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- An ordinary working day of 8 hours is paid 100% of the daily rate.\n- Unworked regular holiday: a covered employee is entitled to 100% of the\n  daily rate if present, or on leave of absence with pay, on the workday\n  immediately preceding the regular holiday. If the day immediately\n  preceding the holiday is a non-working day or rest day, the employee must\n  have been present or on paid leave on the workday immediately before that\n  non-working day or rest day.\n- Meal breaks of 1 hour are unpaid and not counted as hours worked.\n\nSCENARIO:\nRamon is a rank-and-file warehouse helper at a manufacturing company with\n80 employees; he is covered by the holiday pay rules. His daily rate is\n₱595. He is paid only for days he actually works, except where a rule above\ngives pay for an unworked day. His workdays are Monday to Saturday and his\nrest day is Sunday.\n- Friday: he worked 8:00 AM to 5:00 PM with an unpaid meal break from\n  12:00 noon to 1:00 PM.\n- Saturday: he was absent without pay (no approved leave).\n- Sunday: his rest day; he did not work.\n- Monday: a regular holiday; he did not work.\n\nQUESTION:\nCompute Ramon's total pay for Friday through Monday (4 days).\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "closed_book_replace": {
+    "except where a rule above\ngives pay": "except where the applicable Philippine labor rules\ngive pay"
+  },
   "expected_answer": 595.0,
   "tolerance": 0.01,
   "failure_categories": [

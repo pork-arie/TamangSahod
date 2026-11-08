@@ -10,6 +10,9 @@
     "years_of_service_fraction"
   ],
   "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- Separation pay for redundancy: the greater of one month pay, or one\n  month pay for every year of service.\n- Separation pay for retrenchment to prevent losses: the greater of one\n  month pay, or one-half month pay for every year of service.\n- One-half month pay = monthly rate ÷ 2.\n- In computing years of service, a fraction of at least 6 months is\n  considered one whole year. A fraction of less than 6 months is not counted.\n- \"One month pay\" is the monthly rate given below; no other pay\n  components are included.\n\nSCENARIO:\nBea is a rank-and-file sales coordinator. She was hired on July 1, 2024.\nHer employer retrenched employees to prevent losses, and her last day of\nwork was September 30, 2025, giving her 1 year and 3 months of service.\nHer monthly rate is ₱27,400.\n\nQUESTION:\nCompute Bea's separation pay.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "closed_book_keep": [
+    "\"One month pay\" is the monthly rate given in the scenario; the employee receives no other pay components or allowances."
+  ],
   "expected_answer": 27400.0,
   "tolerance": 0.01,
   "failure_categories": [
