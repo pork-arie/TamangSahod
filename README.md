@@ -9,10 +9,15 @@ separation pay.
 
 ## What the eval tests
 
-Each task gives the model a realistic payroll scenario **and the exact rules it needs**,
-quoted from the DOLE-BWC *Handbook on Workers' Statutory Monetary Benefits*. Because the
-rules are in the prompt, this tests **multi-step reasoning over the rules**, not recall of
-Philippine law. Examples:
+Each task gives the model a realistic payroll scenario. It runs in two conditions:
+
+- **Open book:** the exact rules it needs are in the prompt, quoted from the DOLE-BWC
+  *Handbook on Workers' Statutory Monetary Benefits*. This tests multi-step reasoning over
+  the rules.
+- **Closed book:** the same prompt with the rules removed. This tests whether the model
+  actually knows Philippine labor law, which is how people really use AI assistants.
+
+The tasks combine rules that interact, for example:
 - stacking multipliers;
 - excluding unpaid breaks;
 - spotting which hours are overtime and which are night hours;
@@ -179,10 +184,12 @@ There are also per-task, by-difficulty and by-tag tables, plus a bar chart.
 
 **Expected runtime and cost** (from the saved trials):
 - `pytest` and `oracle_check.py` take a few seconds and need no API key.
-- A full run is 10 tasks × 3 trials = 30 calls per model.
-  - Nemotron took about 35 minutes of model time (about 69 s per trial; median 3,852
-    completion tokens).
-  - Gemma took about 15 s per trial (about 470 completion tokens).
+- A full run is 10 tasks × 3 trials = 30 calls per model per condition.
+  - Nemotron, open book: about 35 minutes of model time (about 69 s per trial; median
+    3,852 completion tokens).
+  - Nemotron, closed book: about 50 minutes (about 99 s per trial; median 7,998
+    completion tokens). Without the rules it reasons about twice as long.
+  - Gemma: about 15 s per trial (about 470 completion tokens).
 - Both models are OpenRouter **free** variants, so the cost was **$0.00**.
 - Free models are rate-limited (HTTP 429). Expect waits, and re-run the same command to
   fill in gaps: finished trials are skipped.
@@ -224,20 +231,29 @@ Every task can run in two conditions:
 
 Full tables: [results/summary.md](results/summary.md). Verified tasks only.
 
-| Model | Pass rate | pass^k | Format failures | Truncated | Trials |
-|---|---|---|---|---|---|
-| `nvidia/nemotron-3-ultra-550b-a55b:free` | 100% (30/30) | 100% (10/10 tasks, k=3) | 0% | 0% | 30 |
-| `google/gemma-4-31b-it:free` | 100% (16/16) | 100% (7/7 tasks, k=1–3) | 0% | 0% | 16 |
+**Nemotron 3 Ultra** (the complete run: 10 tasks × 3 trials × 2 conditions):
 
-**Headline finding:** when every rule is stated in the prompt, neither model made a single
-computation error. That includes the hardest tasks:
-- a 14-day timesheet where holiday eligibility depends on a day the company was closed;
-- exemption cut-offs at exactly 5, 9 and 10 workers;
-- stacked holiday × rest day × overtime × night multipliers.
+| Condition | Pass rate | pass^k | Format failures (truncated) |
+|---|---|---|---|
+| Open book (rules given) | **100%** (30/30) | 100% (10/10 tasks) | 0% |
+| Closed book (rules removed) | **40%** (12/30) | 30% (3/10 tasks) | 7% (2 trials) |
 
-Neither model fell into the documented traps: meal break counted, premiums added instead of
-multiplied, the wrong eligibility day, or a fraction rounded the wrong way. The one failure
-this eval did surface is about **output budget**, not arithmetic (see Failure analysis).
+Per task, closed book: task_04, 06 and 08 passed 3/3; task_07 2/3; task_01 1/3; task_02,
+03, 05, 09 and 10 passed 0/3.
+
+**Headline finding:** the model can *apply* Philippine payroll rules perfectly when it is
+given them, but it does not *know* them.
+- With the rules in the prompt, it made zero errors, including on a 14-day timesheet and on
+  exemption cut-offs at exactly 5, 9 and 10 workers.
+- With the same scenarios and no rules, its pass rate fell from **100% to 40%**.
+- The failures are not random. **15 of its 18 closed-book failures involve the night shift
+  differential.** On the 6 tasks with night hours it passed **1 of 18** trials. On the 4
+  tasks without night hours it passed **11 of 12**.
+
+**Gemma 4 31B:**
+- Open book: 100% (16/16 trials; the free tier's rate limits left gaps).
+- Closed book: cut short by the same rate limits. Its few closed trials are in
+  [results/summary.md](results/summary.md); they are too few to draw conclusions from.
 
 ![Pass rate per model](results/pass_rate.png)
 
@@ -245,39 +261,61 @@ Full transcripts of the reported trials are in [results/sample/](results/sample/
 
 ## Failure analysis
 
-**1. Reasoning models running out of output budget (the only failure observed).**
-- In the first run, Nemotron used `max_tokens = 4096`. It produced **no final answer in 3 of 3
-  trials** on task_01: `finish_reason = "length"`, all 4,096 tokens used, graded
-  `format_failure`.
-- Its arithmetic was never the problem. The model kept working through the multipliers until
-  it was cut off.
-- After raising its budget to 16,384, it passed 30/30. Even so, the 14-day timesheet
-  (task_09) used **15,695 of 16,384 tokens** in one trial, which is 96% of the budget. One
-  slightly longer chain of thought would have been another format failure.
-- A payroll assistant built on a reasoning model can fail silently on exactly the long,
-  multi-day cases that matter most, unless the output budget is sized for them.
-- The old truncated trials were moved to `results/archive_max_tokens_4096/` (git-ignored).
-  The report flags such cases in the **Truncated** column.
+All 18 of Nemotron's closed-book failures, each classified by reading its transcript
+(`results/sample/nvidia__nemotron-3-ultra-550b-a55b_free/closed/`).
+- In every one of the 15 night-differential failures, that is the **only** mistake: the rest
+  of the computation (day premium, overtime factor, meal break, exemptions) is correct. Each
+  wrong amount equals the calculator's result with just that one change.
+- Four of the wrong amounts (₱2,220.80, ₱705.31, ₱4,981.01, ₱13,700.00) appear in advance in
+  the tasks' `solution.md` files. For ₱705.31 the predicted cause was "applies both
+  exemptions"; the transcripts show the actual cause is simpler: the night differential is
+  never considered at all.
 
-**2. Cost of correctness.** Nemotron needed a median of 3,852 completion tokens and about 69 s
-per task. Gemma needed about 470 tokens and about 15 s. Both were correct, but the reasoning
-model was roughly 8× more expensive in tokens for the same answer.
+| Mistake (as seen in the transcript) | Trials | Tasks (wrong answer) |
+|---|---|---|
+| **Night differential on the basic rate.** The transcript states it explicitly, e.g. "10% of basic hourly rate", "10% × ₱80", "10% × HR = ₱9.00", and adds that flat amount instead of multiplying the holiday / rest-day / overtime rate by 1.10 | **9** | task_01 ×2 (₱2,220.80), task_02 ×2 (₱1,765.81), task_03 (₱720.56), task_05 (₱4,989.07), task_09 ×3 (₱10,175.40) |
+| **Night differential never mentioned.** The answer computes the day correctly but does not mention night work or a differential at all | **6** | task_03 ×2 (₱705.31), task_05 (₱4,981.01), task_10 ×3 (₱2,852.44) |
+| Ran out of output budget (no final answer) | 2 | task_02, task_05 (all 16,384 tokens used) |
+| Skipped the one-month minimum for separation pay | 1 | task_07 (₱13,700.00) |
 
-**3. Designed traps that no model fell into.** Each task's `solution.md` lists the wrong
-answers these mistakes produce, so a judge can check that the grader would catch them:
-- counting the unpaid meal break;
-- adding premiums instead of multiplying them;
-- putting the night differential on the basic rate only;
-- swapping the holiday-pay and night-differential exemptions;
-- checking the wrong day for holiday eligibility;
-- rounding a 5-month fraction up;
-- skipping the one-month minimum.
+**1. The night shift differential is the blind spot (15 of 18 failures).**
+- The Handbook says the 10% is computed on "the corresponding hourly rate" (Ch. 5 C, p. 26),
+  and its rate table multiplies it in, e.g. special day + night + overtime =
+  1.3 × 1.1 × 1.3 = 1.859 (pp. 2–3).
+- In 9 trials the model says it uses the basic rate; in 6 it ignores night work. In task_02 it writes: *"NSD of 10% of regular
+  hourly rate per hour (Art. 86, Labor Code)"*. It cites the right article and still
+  computes 2 × 0.10 × ₱143.68 = ₱28.74, getting ₱1,765.81 instead of ₱1,780.04. Every other
+  step of that answer is correct.
+- In task_10 (all 3 trials) it applies the holiday-pay exemptions correctly (fewer than 10
+  workers) and the holiday overtime rate correctly, but never mentions the night differential
+  for anyone. The transcripts do not say why, so we do not guess.
+- The same wrong rule appears in the same way across trials and across tasks, so this is a
+  stable gap in what the model believes the law is, not noise.
+- Each wrong answer is short by only about ₱2–₱54, which is exactly how payroll underpayment
+  goes unnoticed.
 
-**What this means:** with the rules in the prompt, these models are reliable calculators of
-Philippine premium, holiday and separation pay. The practical risks are elsewhere:
-- **rule recall:** a user asking "how much is holiday pay on a rest day?" without supplying
-  the rules. This eval deliberately does not test that.
-- **output budget:** a reasoning model truncated before it gives an answer.
+**2. What it does know.** Without any rules it still got these right:
+- unworked-holiday eligibility through a rest day (task_04, 3/3);
+- separation-pay formulas and the 6-month fraction rule (task_06 and 08, 6/6);
+- premiums on rest days, special days and holidays, overtime factors, excluding the meal
+  break, and the holiday-pay exemption threshold.
+
+The knowledge gap is narrow and specific.
+
+**3. Output budget.**
+- With the original `max_tokens = 4096`, Nemotron produced no final answer in 3 of 3
+  open-book trials on task_01. The budget was then raised to 16,384.
+- Closed book, it still hit 16,384 twice: without rules it reasons about twice as long
+  (median 7,998 vs 3,852 tokens).
+- A reasoning model can fail silently on exactly the long cases, unless the output budget is
+  sized for them. The report shows this in the **Truncated** column. The old 4096-token
+  trials are in `results/archive_max_tokens_4096/` (git-ignored).
+
+**What this means for payroll tools:** do not rely on a model's built-in knowledge of
+Philippine labor rules. Given the rules, it computed correctly every time. Without them it
+underpaid night work in 15 of 18 failures. A payroll assistant should put the applicable
+rules in the prompt, or retrieve them, and should be tested on night-shift cases in
+particular.
 
 ## Limitations
 
@@ -287,10 +325,13 @@ Philippine premium, holiday and separation pay. The practical risks are elsewher
 - **Gemma coverage is incomplete.** The free tier's rate limits (HTTP 429) prevented 14 of its
   30 trials, including all of task_02, task_09 and task_10. API errors are never counted
   as model failures; missing trials are simply absent, and the report shows k per task.
-- **No failures in arithmetic or rule application.** The eval cannot rank these two models
-  against each other on accuracy.
-- Rules are given in the prompt, so this does **not** test whether a model knows Philippine
-  law unaided.
+- **Gemma's closed-book run is too incomplete to compare** (free-tier rate limits). The
+  open-vs-closed finding rests on Nemotron's complete 60-trial run.
+- **The open condition shows no failures** for either model, so it cannot rank models on
+  accuracy. The closed condition is where models differ.
+- **Closed book keeps a few given facts** (a days factor, "no policy or CBA", rounding
+  conventions, "no other pay components"). These are task facts, not law; see the Fairness
+  note above.
 - Private-sector rules only. The calculator raises `NotImplementedError` instead of guessing
   for:
   - shifts that cross midnight;

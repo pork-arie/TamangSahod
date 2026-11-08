@@ -1,0 +1,32 @@
+{
+  "task_id": "task_02",
+  "model": "google/gemma-4-31b-it:free",
+  "served_model": "google/gemma-4-31b-it:free",
+  "provider": "Google AI Studio",
+  "trial": 2,
+  "condition": "closed",
+  "timestamp": "2026-11-08T08:25:20.806385+00:00",
+  "settings": {
+    "temperature": 0.0,
+    "max_tokens": 4096
+  },
+  "prompt_sha256": "822046af2376904e2fca495e1bd5a04ee5bad4ddb07476746858b9857f7e53d6",
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nGIVEN FACTS:\n- The employer computes the daily rate as (monthly salary × 12) ÷ 261, rounded to the nearest centavo.\n\nSCENARIO:\nJose is a rank-and-file accounting clerk at a logistics company with 120\nemployees. He is paid a monthly salary of ₱25,000. He works a 5-day week,\nand his employer uses a days factor of 261 days per year. August 21 is a\nspecial non-working day and is not his rest day. On August 21, he worked\nfrom 2:00 PM to 12:00 midnight, with an unpaid 1-hour meal break from\n6:00 PM to 7:00 PM.\n\nQUESTION:\nUsing his daily rate and the applicable Philippine labor rules, compute Jose's total pay for the\nhours he worked on August 21.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "response": "**1. Compute the Daily Rate**\nDaily Rate = (Monthly Salary × 12) ÷ 261\nDaily Rate = (₱25,000 × 12) ÷ 261\nDaily Rate = ₱300,000 ÷ 261\nDaily Rate = ₱1,149.4252...\nRounded to the nearest centavo: **₱1,149.43**\n\n**2. Compute the Hourly Rate**\nHourly Rate = Daily Rate ÷ 8 hours\nHourly Rate = ₱1,149.43 ÷ 8\nHourly Rate = **₱143.67875** (We will maintain precision for the final calculation)\n\n**3. Determine Hours Worked and Overtime**\n- Shift: 2:00 PM to 12:00 midnight (10 hours total elapsed time)\n- Less: 1-hour unpaid meal break (6:00 PM to 7:00 PM)\n- Total hours worked: 9 hours\n- Regular hours: 8 hours\n- Overtime hours: 1 hour\n\n**4. Apply Pay Rates for Special Non-Working Day**\nUnder Philippine labor law, work on a special non-working day is paid an additional 30% of the basic rate for the first 8 hours, and overtime is paid an additional 30% of the special day hourly rate.\n\n- **Regular Pay (First 8 hours):**\n  Formula: Hourly Rate × 8 hours × 130%\n  Calculation: ₱143.67875 × 8 × 1.3 = **₱1,495.26**\n\n- **Overtime Pay (1 hour):**\n  Formula: (Hourly Rate × 130%) × 1 hour × 130%\n  Calculation: (₱143.67875 × 1.3) × 1 × 1.3\n  Calculation: ₱186.782375 × 1.3 = **₱242.82**\n\n**5. Total Pay for August 21**\nTotal Pay = Regular Pay + Overtime Pay\nTotal Pay = ₱1,495.26 + ₱242.82\nTotal Pay = **₱1,738.08**\n\nFINAL ANSWER: ₱1,738.08",
+  "reasoning": null,
+  "finish_reason": "stop",
+  "expected_answer": "1780.04",
+  "tolerance": "0.01",
+  "extracted_answer": "1738.08",
+  "status": "fail",
+  "format_reason": null,
+  "passed": false,
+  "score": 0,
+  "latency_seconds": 17.993,
+  "usage": {
+    "prompt_tokens": 247,
+    "completion_tokens": 546,
+    "total_tokens": 793,
+    "cost_usd": 0
+  }
+}

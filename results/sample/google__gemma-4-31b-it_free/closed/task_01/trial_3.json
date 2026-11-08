@@ -1,0 +1,32 @@
+{
+  "task_id": "task_01",
+  "model": "google/gemma-4-31b-it:free",
+  "served_model": "google/gemma-4-31b-it:free",
+  "provider": "Google AI Studio",
+  "trial": 3,
+  "condition": "closed",
+  "timestamp": "2026-11-08T08:14:18.189855+00:00",
+  "settings": {
+    "temperature": 0.0,
+    "max_tokens": 4096
+  },
+  "prompt_sha256": "74b58ff80c7ff18c2e75faef53c784b9c8c57fc84aaf9571c0c13b27b170f930",
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nSCENARIO:\nMaria is a rank-and-file employee at a manufacturing company with 50\nemployees. Her daily rate is ₱640. December 30 is a regular holiday and\nalso her scheduled rest day. On December 30, she worked from 1:00 PM to\n12:00 midnight, with an unpaid 1-hour meal break from 5:00 PM to 6:00 PM.\n\nQUESTION:\nCompute Maria's total pay for December 30.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "response": "To compute Maria's pay for December 30, we must apply the rules for a **Regular Holiday that falls on a Scheduled Rest Day**.\n\n**1. Basic Parameters:**\n*   Daily Rate: ₱640.00\n*   Hourly Rate: ₱640 / 8 hours = ₱80.00 per hour\n*   Work Schedule: 1:00 PM to 12:00 Midnight (11 hours total)\n*   Unpaid Break: 1 hour (5:00 PM to 6:00 PM)\n*   Total Hours Worked: 10 hours\n\n**2. Applicable Rates (Philippine Labor Law):**\n*   **Regular Holiday on Rest Day (First 8 hours):** 260% of the daily rate.\n*   **Overtime on Regular Holiday on Rest Day:** Hourly rate $\\times$ 260% $\\times$ 130%.\n*   **Night Shift Differential (NSD):** Additional 10% of the hourly rate for work performed between 10:00 PM and 6:00 AM.\n\n**3. Step-by-Step Computation:**\n\n*   **First 8 Hours (Regular Holiday + Rest Day):**\n    $\\text{Daily Rate} \\times 260\\% = 640 \\times 2.6 = ₱1,664.00$\n\n*   **Overtime (OT) Pay (2 hours: 10:00 PM to 12:00 Midnight):**\n    $\\text{Hourly Rate} \\times 260\\% \\times 130\\% \\times 2 \\text{ hours}$\n    $80 \\times 2.6 \\times 1.3 \\times 2 = ₱540.80$\n\n*   **Night Shift Differential (NSD) (2 hours: 10:00 PM to 12:00 Midnight):**\n    $\\text{Hourly Rate} \\times 260\\% \\times 10\\% \\times 2 \\text{ hours}$\n    $80 \\times 2.6 \\times 0.10 \\times 2 = ₱41.60$\n\n**4. Total Pay Calculation:**\n$\\text{Total Pay} = 1,664.00 + 540.80 + 41.60 = ₱2,246.40$\n\nFINAL ANSWER: ₱2,246.40",
+  "reasoning": null,
+  "finish_reason": "stop",
+  "expected_answer": "2258.88",
+  "tolerance": "0.01",
+  "extracted_answer": "2246.40",
+  "status": "fail",
+  "format_reason": null,
+  "passed": false,
+  "score": 0,
+  "latency_seconds": 17.519,
+  "usage": {
+    "prompt_tokens": 157,
+    "completion_tokens": 564,
+    "total_tokens": 721,
+    "cost_usd": 0
+  }
+}

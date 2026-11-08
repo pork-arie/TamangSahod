@@ -1,0 +1,32 @@
+{
+  "task_id": "task_03",
+  "model": "google/gemma-4-31b-it:free",
+  "served_model": "google/gemma-4-31b-it:free",
+  "provider": "Google AI Studio",
+  "trial": 2,
+  "condition": "closed",
+  "timestamp": "2026-11-08T08:46:14.209574+00:00",
+  "settings": {
+    "temperature": 0.0,
+    "max_tokens": 4096
+  },
+  "prompt_sha256": "c0c57247e45e08307b229b5e7bff40affc1cafe274f5f4324365ea8802c6704c",
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nGIVEN FACTS:\n- If an employee is not covered by holiday pay and works on a regular holiday, the day is paid as an ordinary working day.\n\nSCENARIO:\nLiza is a rank-and-file cashier at a retail convenience store that regularly\nemploys 7 workers. Her daily rate is ₱610. December 25 is a regular holiday\nand is not her rest day. On December 25, she worked from 2:00 PM to 12:00\nmidnight, with an unpaid 1-hour meal break from 6:00 PM to 7:00 PM.\n\nQUESTION:\nCompute Liza's total pay for December 25.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "response": "**1. Determine Eligibility for Holiday Pay**\nUnder Philippine labor law, retail and service establishments regularly employing fewer than 10 workers are exempt from the obligation to pay holiday pay. Since Liza's store employs only 7 workers, she is not covered by holiday pay.\n\n**2. Determine the Rate of Pay**\nBased on the given facts, if an employee is not covered by holiday pay and works on a regular holiday, the day is paid as an ordinary working day.\nDaily Rate = ₱610.00\nHourly Rate = ₱610.00 / 8 hours = ₱76.25 per hour\n\n**3. Calculate Hours Worked**\n- Shift: 2:00 PM to 12:00 midnight = 10 hours\n- Less: Unpaid meal break (6:00 PM to 7:00 PM) = 1 hour\n- Total hours worked = 9 hours\n\n**4. Compute Total Pay**\n- First 8 hours (Ordinary Day Rate): ₱610.00\n- 1 hour Overtime (Ordinary Day Rate × 125%):\n  ₱76.25 × 1.25 = ₱95.3125\n\nTotal Pay = ₱610.00 + ₱95.3125 = ₱705.3125\n\nRounding to two decimal places: ₱705.31\n\nFINAL ANSWER: ₱705.31",
+  "reasoning": null,
+  "finish_reason": "stop",
+  "expected_answer": "722.47",
+  "tolerance": "0.01",
+  "extracted_answer": "705.31",
+  "status": "fail",
+  "format_reason": null,
+  "passed": false,
+  "score": 0,
+  "latency_seconds": 11.685,
+  "usage": {
+    "prompt_tokens": 195,
+    "completion_tokens": 332,
+    "total_tokens": 527,
+    "cost_usd": 0
+  }
+}

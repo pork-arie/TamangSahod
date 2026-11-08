@@ -1,0 +1,32 @@
+{
+  "task_id": "task_07",
+  "model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "served_model": "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "provider": "Nvidia",
+  "trial": 3,
+  "condition": "closed",
+  "timestamp": "2026-11-08T08:11:10.459530+00:00",
+  "settings": {
+    "temperature": 0.0,
+    "max_tokens": 16384
+  },
+  "prompt_sha256": "10dd41ccbe6e9f13ba2e598c326d3d869c999cc1abc12091094b13a77f7be19a",
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nGIVEN FACTS:\n- \"One month pay\" is the monthly rate given in the scenario; the employee receives no other pay components or allowances.\n\nSCENARIO:\nBea is a rank-and-file sales coordinator. She was hired on July 1, 2024.\nHer employer retrenched employees to prevent losses, and her last day of\nwork was September 30, 2025, giving her 1 year and 3 months of service.\nHer monthly rate is ₱27,400.\n\nQUESTION:\nCompute Bea's separation pay.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "response": "**Computation of Separation Pay (Retrenchment to Prevent Losses)**\n\n1. **Length of Service**  \n   - Date hired: July 1, 2024  \n   - Last day of work: September 30, 2025  \n   - Total service: 1 year and 3 months  \n\n2. **Applicable Rule for Retrenchment (Art. 298, Labor Code)**  \n   - Separation pay = ½ month pay for every year of service  \n   - A fraction of at least 6 months is considered one whole year; a fraction less than 6 months is not counted.\n\n3. **Years of Service for Computation**  \n   - 1 year (the 3-month fraction is less than 6 months, so it is not counted as an additional year).\n\n4. **Monthly Rate**  \n   - ₱27,400 (no other pay components or allowances)\n\n5. **Separation Pay Calculation**  \n   \\[\n   \\text{Separation Pay} = \\frac{1}{2} \\times \\text{Monthly Rate} \\times \\text{Years of Service}\n   \\]\n   \\[\n   \\text{Separation Pay} = 0.5 \\times 27,400 \\times 1 = 13,700\n   \\]\n\n**FINAL ANSWER: ₱13,700.00**",
+  "reasoning": "We are given a scenario: Bea is a rank-and-file sales coordinator. Hired July 1, 2024. Last day of work September 30, 2025. Service: 1 year and 3 months. Monthly rate: ₱27,400. Employer retrenched employees to prevent losses. This is a case of retrenchment to prevent losses, which is an authorized cause under Article 298 (formerly 283) of the Labor Code. Separation pay for retrenchment is one-half (1/2) month pay for every year of service, a fraction of at least six (6) months being considered as one (1) whole year.\n\nWe need to compute separation pay.\n\nFirst, determine length of service: Hired July 1, 2024. Last day September 30, 2025. That is 1 year and 3 months. Specifically: July 1, 2024 to July 1, 2025 = 1 year. July 1, 2025 to September 30, 2025 = 3 months. So total 1 year and 3 months.\n\nUnder the law, a fraction of at least 6 months is considered one whole year. Here the fraction is 3 months, which is less than 6 months. So it is not considered a full year. Therefore, the years of service for separation pay computation is 1 year.\n\nSeparation pay = 1/2 month pay per year of service = 0.5 * monthly rate * number of years.\n\nMonthly rate = ₱27,400.\n\nSeparation pay = 0.5 * 27,400 * 1 = ₱13,700.\n\nBut wait: The problem says \"One month pay is the monthly rate given in the scenario; the employee receives no other pay components or allowances.\" So we use the monthly rate directly.\n\nThus separation pay = ₱13,700.00.\n\nWe need to show computation and end with exactly one line: FINAL ANSWER: ₱<amount with 2 decimals>\n\nSo FINAL ANSWER: ₱13,700.00\n\nBut let's double-check: Is there any other nuance? Retrenchment to prevent losses: separation pay is 1/2 month pay per year of service. Yes. Also, the employee is rank-and-file, so no issue. The service is 1 year and 3 months. Since fraction is less than 6 months, it's not counted as a full year. So 1 year only.\n\nThus answer is ₱13,700.00.\n\nWe'll present computation step by step.",
+  "finish_reason": "stop",
+  "expected_answer": "27400.0",
+  "tolerance": "0.01",
+  "extracted_answer": "13700.00",
+  "status": "fail",
+  "format_reason": null,
+  "passed": false,
+  "score": 0,
+  "latency_seconds": 12.65,
+  "usage": {
+    "prompt_tokens": 183,
+    "completion_tokens": 912,
+    "total_tokens": 1095,
+    "cost_usd": 0
+  }
+}
