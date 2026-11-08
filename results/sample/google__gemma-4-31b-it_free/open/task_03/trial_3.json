@@ -1,0 +1,31 @@
+{
+  "task_id": "task_03",
+  "model": "google/gemma-4-31b-it:free",
+  "served_model": "google/gemma-4-31b-it:free",
+  "provider": "Google AI Studio",
+  "trial": 3,
+  "timestamp": "2026-11-07T15:33:24.456696+00:00",
+  "settings": {
+    "temperature": 0.0,
+    "max_tokens": 4096
+  },
+  "prompt_sha256": "47ad817495db03bedd47f3ef5e4f9f8b86bd022b2c38fe699ae48ddfce15e14d",
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- Hourly rate = daily rate ÷ 8.\n- Holiday pay coverage: retail and service establishments regularly\n  employing less than 10 workers are exempt from holiday pay. If the\n  employee is exempt and works on a regular holiday, the day is paid as an\n  ordinary working day (no holiday premium).\n- Work on a regular holiday (covered employees) is paid 200% of the daily\n  rate for the first 8 hours. Overtime on a regular holiday is paid an\n  additional 30% of the hourly rate on said day.\n- Overtime work (beyond 8 hours) on an ordinary working day is paid an\n  additional 25% of the hourly rate.\n- Night shift differential: an additional 10% of the hourly rate for\n  each hour worked between 10:00 PM and 6:00 AM. If the hour is also\n  holiday, rest day, or overtime work, the 10% is computed on the\n  applicable hourly rate for that hour.\n- Night shift differential coverage: retail and service establishments\n  regularly employing not more than 5 workers are exempt from night shift\n  differential.\n- Meal breaks of 1 hour are unpaid and not counted as hours worked.\n\nSCENARIO:\nLiza is a rank-and-file cashier at a retail convenience store that regularly\nemploys 7 workers. Her daily rate is ₱610. December 25 is a regular holiday\nand is not her rest day. On December 25, she worked from 2:00 PM to 12:00\nmidnight, with an unpaid 1-hour meal break from 6:00 PM to 7:00 PM.\n\nQUESTION:\nCompute Liza's total pay for December 25.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "response": "**1. Basic Parameters:**\n*   Daily Rate: ₱610.00\n*   Hourly Rate: ₱610.00 ÷ 8 = ₱76.25\n*   Establishment Size: 7 workers (Retail)\n\n**2. Coverage Check:**\n*   **Holiday Pay:** Retail establishments employing less than 10 workers are exempt. Since the store employs 7, Liza is **exempt** from holiday pay. Work on a regular holiday is paid as an ordinary working day.\n*   **Night Shift Differential (NSD):** Retail establishments employing not more than 5 workers are exempt. Since the store employs 7, Liza is **covered** by NSD.\n\n**3. Hours Worked Analysis:**\n*   Shift: 2:00 PM to 12:00 Midnight\n*   Total elapsed time: 10 hours\n*   Less meal break: 1 hour (6:00 PM to 7:00 PM)\n*   Total hours worked: 9 hours\n    *   First 8 hours: 2:00 PM to 11:00 PM (excluding break)\n    *   Overtime (OT): 11:00 PM to 12:00 Midnight (1 hour)\n\n**4. Pay Computation:**\n*   **First 8 Hours (Ordinary Day Rate):**\n    Since she is exempt from holiday pay, she earns her daily rate.\n    Pay = ₱610.00\n\n*   **Overtime Pay (1 hour):**\n    OT rate = Hourly rate × 125%\n    OT pay = ₱76.25 × 1.25 = ₱95.3125\n\n*   **Night Shift Differential (NSD):**\n    NSD applies from 10:00 PM to 12:00 Midnight (2 hours).\n    *   Hour 1 (10 PM - 11 PM): This is within the first 8 hours.\n        NSD = ₱76.25 × 10% = ₱7.625\n    *   Hour 2 (11 PM - 12 AM): This is an OT hour.\n        NSD = (Hourly rate × 1.25) × 10% = ₱95.3125 × 0.10 = ₱9.53125\n    Total NSD = ₱7.625 + ₱9.53125 = ₱17.15625\n\n**5. Total Pay Calculation:**\nTotal = Basic Pay + OT Pay + NSD\nTotal = ₱610.00 + ₱95.3125 + ₱17.15625\nTotal = ₱722.46875\n\nRounding to two decimal places: ₱722.47\n\nFINAL ANSWER: ₱722.47",
+  "reasoning": null,
+  "finish_reason": "stop",
+  "expected_answer": "722.47",
+  "tolerance": "0.01",
+  "extracted_answer": "722.47",
+  "status": "pass",
+  "format_reason": null,
+  "passed": true,
+  "score": 1,
+  "latency_seconds": 20.87,
+  "usage": {
+    "prompt_tokens": 451,
+    "completion_tokens": 662,
+    "total_tokens": 1113,
+    "cost_usd": 0
+  }
+}

@@ -62,7 +62,7 @@ def sample_sandbox(tmp_path, monkeypatch):
 
 
 def write_raw(root, name, prompt, extra=""):
-    path = root / "results" / "raw" / "m" / "task_01" / f"trial_{name}.json"
+    path = root / "results" / "raw" / "m" / "open" / "task_01" / f"trial_{name}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps({"task_id": "task_01", "model": "m", "prompt": prompt,
                                 "response": extra}), encoding="utf-8")
@@ -95,6 +95,6 @@ def test_sample_mirrors_raw_and_keeps_gitkeep(sample_sandbox, monkeypatch):
     monkeypatch.setattr(sys, "argv", ["make_sample.py"])
     monkeypatch.setattr(make_sample, "load_tasks", lambda _: [dict(TASK, verified=True)])
     make_sample.main()
-    assert (sample / "m" / "task_01" / "trial_1.json").exists()
+    assert (sample / "m" / "open" / "task_01" / "trial_1.json").exists()
     assert (sample / ".gitkeep").exists()
     assert not (sample / "old_model").exists()  # old contents are cleared

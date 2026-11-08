@@ -1,0 +1,31 @@
+{
+  "task_id": "task_07",
+  "model": "google/gemma-4-31b-it:free",
+  "served_model": "google/gemma-4-31b-it:free",
+  "provider": "Google AI Studio",
+  "trial": 3,
+  "timestamp": "2026-11-07T16:32:09.534825+00:00",
+  "settings": {
+    "temperature": 0.0,
+    "max_tokens": 4096
+  },
+  "prompt_sha256": "6788f6b14862dd8b366474cf50581ced907fa4a834c30f1e083414cdb48e1c14",
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- Separation pay for redundancy: the greater of one month pay, or one\n  month pay for every year of service.\n- Separation pay for retrenchment to prevent losses: the greater of one\n  month pay, or one-half month pay for every year of service.\n- One-half month pay = monthly rate ÷ 2.\n- In computing years of service, a fraction of at least 6 months is\n  considered one whole year. A fraction of less than 6 months is not counted.\n- \"One month pay\" is the monthly rate given below; no other pay\n  components are included.\n\nSCENARIO:\nBea is a rank-and-file sales coordinator. She was hired on July 1, 2024.\nHer employer retrenched employees to prevent losses, and her last day of\nwork was September 30, 2025, giving her 1 year and 3 months of service.\nHer monthly rate is ₱27,400.\n\nQUESTION:\nCompute Bea's separation pay.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "response": "**1. Determine the applicable rule:**\nThe scenario is retrenchment to prevent losses. The rule is the greater of one month pay or one-half month pay for every year of service.\n\n**2. Determine years of service:**\nBea's service is 1 year and 3 months.\nAccording to the rules, a fraction of less than 6 months is not counted.\nTherefore, her years of service = 1 year.\n\n**3. Compute the two options for separation pay:**\n*   **Option A (One month pay):**\n    ₱27,400.00\n\n*   **Option B (One-half month pay per year of service):**\n    One-half month pay = ₱27,400.00 ÷ 2 = ₱13,700.00\n    Computation: ₱13,700.00 × 1 year = ₱13,700.00\n\n**4. Compare and select the greater amount:**\n₱27,400.00 (Option A) is greater than ₱13,700.00 (Option B).\n\nFINAL ANSWER: ₱27,400.00",
+  "reasoning": null,
+  "finish_reason": "stop",
+  "expected_answer": "27400.0",
+  "tolerance": "0.01",
+  "extracted_answer": "27400.00",
+  "status": "pass",
+  "format_reason": null,
+  "passed": true,
+  "score": 1,
+  "latency_seconds": 9.773,
+  "usage": {
+    "prompt_tokens": 285,
+    "completion_tokens": 271,
+    "total_tokens": 556,
+    "cost_usd": 0
+  }
+}

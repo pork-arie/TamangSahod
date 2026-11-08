@@ -248,3 +248,20 @@ def test_compute_from_inputs_kinds():
                                 "end_date": "2025-09-30", "cause": "redundancy"}) == Decimal("160000.00")
     with pytest.raises(ValueError):
         compute_from_inputs({"kind": "bonus"})
+
+
+# --- "total" kind: adds several results (e.g. several employees), no new pay rule ---------
+
+def test_total_kind_adds_each_rounded_result():
+    from reference.calculator import compute_from_inputs
+    shift = [["14:00", "18:00"], ["19:00", "24:00"]]
+    one = {"kind": "day", "daily_rate": 610, "day_type": "regular_holiday", "intervals": shift,
+           "establishment": {"type": "retail", "worker_count": 7}}
+    # task_03 alone is 722.47, so two of the same employee are 1444.94
+    assert compute_from_inputs({"kind": "total", "items": [one, one]}) == Decimal("1444.94")
+
+
+def test_total_kind_needs_items():
+    from reference.calculator import compute_from_inputs
+    with pytest.raises(ValueError, match="items"):
+        compute_from_inputs({"kind": "total", "items": []})

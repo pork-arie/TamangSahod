@@ -1,0 +1,31 @@
+{
+  "task_id": "task_04",
+  "model": "google/gemma-4-31b-it:free",
+  "served_model": "google/gemma-4-31b-it:free",
+  "provider": "Google AI Studio",
+  "trial": 3,
+  "timestamp": "2026-11-07T15:57:17.490569+00:00",
+  "settings": {
+    "temperature": 0.0,
+    "max_tokens": 4096
+  },
+  "prompt_sha256": "7f4b554397c94d3cb745242dc04d56f9c1c3644ec7ec69c6de71721acf1a917e",
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- An ordinary working day of 8 hours is paid 100% of the daily rate.\n- Unworked regular holiday: a covered employee is entitled to 100% of the\n  daily rate if present, or on leave of absence with pay, on the workday\n  immediately preceding the regular holiday. If the day immediately\n  preceding the holiday is a non-working day or rest day, the employee must\n  have been present or on paid leave on the workday immediately before that\n  non-working day or rest day.\n- Meal breaks of 1 hour are unpaid and not counted as hours worked.\n\nSCENARIO:\nRamon is a rank-and-file warehouse helper at a manufacturing company with\n80 employees; he is covered by the holiday pay rules. His daily rate is\n₱595. He is paid only for days he actually works, except where a rule above\ngives pay for an unworked day. His workdays are Monday to Saturday and his\nrest day is Sunday.\n- Friday: he worked 8:00 AM to 5:00 PM with an unpaid meal break from\n  12:00 noon to 1:00 PM.\n- Saturday: he was absent without pay (no approved leave).\n- Sunday: his rest day; he did not work.\n- Monday: a regular holiday; he did not work.\n\nQUESTION:\nCompute Ramon's total pay for Friday through Monday (4 days).\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "response": "To compute Ramon's total pay from Friday to Monday, we evaluate each day based on the provided rules:\n\n1.  **Friday**:\n    *   Hours: 8:00 AM to 5:00 PM is 9 hours.\n    *   Less 1 hour unpaid meal break = 8 hours worked.\n    *   Pay: 100% of daily rate = **₱595.00**\n\n2.  **Saturday**:\n    *   Status: Absent without pay.\n    *   Pay: **₱0.00**\n\n3.  **Sunday**:\n    *   Status: Rest day (not worked).\n    *   Pay: **₱0.00**\n\n4.  **Monday (Regular Holiday)**:\n    *   Status: Unworked regular holiday.\n    *   Rule: To be entitled to 100% pay for an unworked regular holiday, the employee must be present or on paid leave on the workday immediately preceding the holiday.\n    *   Preceding workday: Saturday.\n    *   Ramon was absent without pay on Saturday. Therefore, he is not entitled to holiday pay for Monday.\n    *   Pay: **₱0.00**\n\n**Total Computation**:\n₱595.00 (Friday) + ₱0.00 (Saturday) + ₱0.00 (Sunday) + ₱0.00 (Monday) = ₱595.00\n\nFINAL ANSWER: ₱595.00",
+  "reasoning": null,
+  "finish_reason": "stop",
+  "expected_answer": "595.0",
+  "tolerance": "0.01",
+  "extracted_answer": "595.00",
+  "status": "pass",
+  "format_reason": null,
+  "passed": true,
+  "score": 1,
+  "latency_seconds": 12.955,
+  "usage": {
+    "prompt_tokens": 373,
+    "completion_tokens": 333,
+    "total_tokens": 706,
+    "cost_usd": 0
+  }
+}

@@ -6,15 +6,21 @@ Examples:
   python run_eval.py --models a/x,b/y --tasks all
   python run_eval.py --max-cost-usd 2.00             # stop once reported cost reaches $2
   python run_eval.py --include-drafts                # also run tasks with verified=false
+  python run_eval.py --condition closed              # closed-book: RULES section removed
 
 Only verified tasks ("verified": true in task.json) run by default.
 
+Conditions (see tasks/__init__.py):
+  open    (default) the task prompt as written, rules included
+  closed  the same prompt with the RULES section removed; same expected answer
+
 Each trial is saved as its own JSON file:
-  results/raw/<model>/<task_id>/trial_<n>.json
+  results/raw/<model>/<condition>/<task_id>/trial_<n>.json
 
 Resuming: a trial is skipped only if its file exists AND it was run with the
-exact same prompt (same prompt_sha256). If the task's prompt was edited since,
-the old file is moved to results/stale/<model>/<task_id>/ and the trial re-runs.
+exact same prompt for that condition (same prompt_sha256). If the task's prompt
+was edited since, the old file is moved to results/stale/<model>/<condition>/<task_id>/
+and the trial re-runs.
 
 API problems (rate limits, timeouts, 5xx, malformed responses) are retried with
 exponential backoff. If retries run out, the trial is logged to
@@ -36,7 +42,7 @@ import yaml
 from dotenv import load_dotenv
 
 from grader import grade
-from tasks import load_tasks, prompt_sha256, saved_prompt_sha256
+from tasks import CONDITIONS, load_tasks, prompt_for, prompt_sha256, saved_prompt_sha256, trial_condition
 
 ROOT = Path(__file__).resolve().parent
 RAW_DIR = ROOT / "results" / "raw"
@@ -76,24 +82,25 @@ def model_dirname(model: str) -> str:
     return model.replace("/", "__").replace(":", "_")
 
 
-def trial_path(model: str, task_id: str, trial: int) -> Path:
-    return RAW_DIR / model_dirname(model) / task_id / f"trial_{trial}.json"
+def trial_path(model: str, condition: str, task_id: str, trial: int) -> Path:
+    return RAW_DIR / model_dirname(model) / condition / task_id / f"trial_{trial}.json"
 
 
-def is_current(path: Path, task: dict) -> bool:
-    """True if the saved trial was run with the task's CURRENT prompt."""
+def is_current(path: Path, task: dict, condition: str) -> bool:
+    """True if the saved trial was run under this condition with its CURRENT prompt."""
     try:
         with open(path, encoding="utf-8") as f:
             saved = json.load(f)
     except (OSError, ValueError):
         return False  # unreadable file: treat as stale and re-run
-    return saved_prompt_sha256(saved) == prompt_sha256(task["prompt"])
+    return (trial_condition(saved) == condition
+            and saved_prompt_sha256(saved) == prompt_sha256(prompt_for(task, condition)))
 
 
-def move_to_stale(path: Path, model: str, task_id: str) -> Path:
+def move_to_stale(path: Path, model: str, condition: str, task_id: str) -> Path:
     """Move an outdated trial file out of results/raw/ (kept, never deleted)."""
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    dest = STALE_DIR / model_dirname(model) / task_id / f"{path.stem}.{stamp}.json"
+    dest = STALE_DIR / model_dirname(model) / condition / task_id / f"{path.stem}.{stamp}.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
     os.replace(path, dest)
     return dest
@@ -161,10 +168,11 @@ def call_model(api_key, model, prompt, cfg, max_tokens):
     raise ApiError(f"gave up after {cfg['max_retries']} retries: {last_error}")
 
 
-def run_trial(api_key, model, task, trial, cfg):
+def run_trial(api_key, model, task, trial, cfg, condition="open"):
     """Call the model once, grade it, and return the record to save."""
     max_tokens = max_tokens_for(model, cfg)
-    data, latency = call_model(api_key, model, task["prompt"], cfg, max_tokens)
+    prompt = prompt_for(task, condition)  # closed = same prompt without the RULES section
+    data, latency = call_model(api_key, model, prompt, cfg, max_tokens)
     choice = data["choices"][0]
     message = choice.get("message") or {}
     content = message.get("content") or ""
@@ -177,10 +185,11 @@ def run_trial(api_key, model, task, trial, cfg):
         "served_model": data.get("model"),     # exact model/version OpenRouter actually used
         "provider": data.get("provider"),
         "trial": trial,
+        "condition": condition,                # open (rules given) or closed (rules removed)
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "settings": {"temperature": cfg["temperature"], "max_tokens": max_tokens},
-        "prompt_sha256": prompt_sha256(task["prompt"]),  # detects later edits to the task
-        "prompt": task["prompt"],
+        "prompt_sha256": prompt_sha256(prompt),  # hash of the text actually sent; detects later edits
+        "prompt": prompt,
         "response": content,                   # the only text the grader sees
         "reasoning": message.get("reasoning"), # hidden thinking, if the model/provider returns it
         "finish_reason": choice.get("finish_reason"),  # "length" = cut off by max_tokens
@@ -228,6 +237,8 @@ def parse_args(cfg):
                    help="stop starting new trials once this run's reported cost reaches this many USD")
     p.add_argument("--include-drafts", action="store_true",
                    help="also run draft tasks (verified=false); their results are marked DRAFT")
+    p.add_argument("--condition", choices=CONDITIONS, default="open",
+                   help="open = rules in the prompt (default); closed = RULES section removed")
     args = p.parse_args()
     args.models = [m.strip() for m in args.models.split(",")] if args.models else cfg["models"]
     return args
@@ -260,18 +271,18 @@ def main():
     for model in args.models:
         if budget_hit:
             break
-        print(f"\n=== {model} (max_tokens={max_tokens_for(model, cfg)}) ===")
+        print(f"\n=== {model} [{args.condition}] (max_tokens={max_tokens_for(model, cfg)}) ===")
         model_broken = False
         for task in tasks:
             for trial in range(1, args.trials + 1):
-                path = trial_path(model, task["id"], trial)
+                path = trial_path(model, args.condition, task["id"], trial)
 
-                # Resume: keep a saved trial only if it used the current prompt.
+                # Resume: keep a saved trial only if it used the current prompt for this condition.
                 if path.exists():
-                    if is_current(path, task):
+                    if is_current(path, task, args.condition):
                         totals["skipped"] += 1
                         continue
-                    dest = move_to_stale(path, model, task["id"])
+                    dest = move_to_stale(path, model, args.condition, task["id"])
                     totals["stale"] += 1
                     print(f"  {task['id']} trial {trial}: prompt changed, old result moved to "
                           f"{dest.relative_to(ROOT)}")
@@ -284,7 +295,7 @@ def main():
 
                 print(f"  {task['id']} trial {trial} ...", end=" ", flush=True)
                 try:
-                    record = run_trial(api_key, model, task, trial, cfg)
+                    record = run_trial(api_key, model, task, trial, cfg, args.condition)
                 except ApiError as e:
                     print("API ERROR (not counted; rerun to retry)")
                     log_api_error(model, task["id"], trial, str(e))

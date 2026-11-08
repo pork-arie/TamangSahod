@@ -458,10 +458,16 @@ def compute_from_inputs(inputs: dict) -> Decimal:
       unworked:   {..rate.., "day_type", "preceding_days", optional establishment/category}
       period:     {..rate.., "days": [...], optional establishment/category}
       separation: {"monthly_rate", "start_date", "end_date", "cause"}
+      total:      {"items": [inputs, inputs, ...]}  -> sum of each item's (rounded) result,
+                  e.g. several employees' pay for the same day. No new pay rule: it only adds.
     """
     kind = inputs.get("kind", "day")
-    if kind not in ("day", "unworked", "period", "separation"):
+    if kind not in ("day", "unworked", "period", "separation", "total"):
         raise ValueError(f"Unknown reference_inputs kind {kind!r}")
+    if kind == "total":
+        if not inputs.get("items"):
+            raise ValueError('"total" needs a non-empty "items" list')
+        return _round(sum((compute_from_inputs(item) for item in inputs["items"]), Decimal(0)))
     if kind == "separation":
         return separation_pay(inputs["monthly_rate"], inputs["start_date"],
                               inputs["end_date"], inputs["cause"])

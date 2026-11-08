@@ -142,7 +142,7 @@ def report_sandbox(tmp_path, monkeypatch):
     monkeypatch.setattr(report, "SUMMARY_MD", tmp_path / "results" / "summary.md")
     monkeypatch.setattr(report, "CHART_PNG", tmp_path / "results" / "pass_rate.png")
     monkeypatch.setattr(report, "TASKS_MD", tmp_path / "results" / "tasks_table.md")
-    trial = tmp_path / "results" / "raw" / "m" / "task_01" / "trial_1.json"
+    trial = tmp_path / "results" / "raw" / "m" / "open" / "task_01" / "trial_1.json"
     trial.parent.mkdir(parents=True)
     trial.write_text(json.dumps({"task_id": "task_01", "model": "m", "prompt": TASK["prompt"],
                                  "status": "pass", "passed": True, "settings": {}}), encoding="utf-8")

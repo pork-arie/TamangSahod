@@ -1,4 +1,11 @@
-"""Shared helpers for loading task folders (tasks/<id>/task.json)."""
+"""Shared helpers for loading task folders (tasks/<id>/task.json).
+
+Each task can be run in two CONDITIONS:
+  open    the prompt exactly as written in task.json (rules + scenario + question)
+  closed  the same prompt with the "RULES (...)" section removed, so the model must
+          know the Philippine rules itself. Scenario, question and the FINAL ANSWER
+          format line are unchanged, and so is the expected answer.
+"""
 
 import hashlib
 import json
@@ -7,6 +14,39 @@ from pathlib import Path
 TASKS_DIR = Path(__file__).resolve().parent
 
 REQUIRED_FIELDS = ["id", "title", "difficulty", "tags", "prompt", "expected_answer", "verified"]
+
+CONDITIONS = ("open", "closed")
+RULES_MARKER = "RULES ("            # start of the rules section, e.g. "RULES (from the DOLE Handbook ...):"
+SCENARIO_MARKER = "\nSCENARIO:"     # the rules section ends where the scenario starts
+
+
+def closed_book_prompt(prompt: str) -> str:
+    """The prompt with its RULES section cut out (from "RULES (" up to "SCENARIO:").
+
+    Everything before the rules (the one-line intro) and everything from SCENARIO:
+    onwards is kept character for character.
+    """
+    if prompt.count(RULES_MARKER) != 1:
+        raise ValueError(f"prompt must contain exactly one {RULES_MARKER!r} section")
+    start = prompt.index(RULES_MARKER)
+    end = prompt.find(SCENARIO_MARKER, start)
+    if end == -1:
+        raise ValueError(f"prompt has no {SCENARIO_MARKER.strip()!r} after the rules section")
+    return prompt[:start] + prompt[end + 1:]  # +1 keeps "SCENARIO:" and drops one newline
+
+
+def prompt_for(task: dict, condition: str) -> str:
+    """The exact text sent to the model for this task under this condition."""
+    if condition == "open":
+        return task["prompt"]
+    if condition == "closed":
+        return closed_book_prompt(task["prompt"])
+    raise ValueError(f"Unknown condition {condition!r}; choose from {CONDITIONS}")
+
+
+def trial_condition(trial: dict) -> str:
+    """Condition a saved trial was run under. Trials saved before conditions existed were open."""
+    return trial.get("condition", "open")
 
 
 def prompt_sha256(prompt: str) -> str:
@@ -41,6 +81,10 @@ def load_tasks(selection="all", tasks_dir=TASKS_DIR):
         if task["id"] != path.parent.name:
             raise ValueError(f"{path}: id {task['id']!r} must match folder name {path.parent.name!r}")
         task.setdefault("tolerance", 0.01)
+        try:
+            closed_book_prompt(task["prompt"])  # every task must support the closed condition
+        except ValueError as e:
+            raise ValueError(f"{path}: cannot build the closed-book prompt: {e}") from None
         tasks.append(task)
 
     if selection in (None, "", "all"):

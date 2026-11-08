@@ -1,0 +1,229 @@
+{
+  "id": "task_09",
+  "title": "Two-week timesheet: holiday eligibility through a closed day, rest-day night overtime, special days worked and unworked",
+  "difficulty": "hard",
+  "verified": true,
+  "tags": [
+    "multi_week_payroll",
+    "unworked_holiday",
+    "holiday_pay_eligibility",
+    "special_non_working_day",
+    "rest_day",
+    "overtime",
+    "night_shift",
+    "regular_holiday",
+    "absence",
+    "meal_break",
+    "rounding"
+  ],
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- Hourly rate = daily rate ÷ 8.\n- An ordinary working day of 8 hours is paid 100% of the daily rate.\n  Overtime work (beyond 8 hours) on an ordinary working day is paid an\n  additional 25% of the hourly rate.\n- Work on the employee's scheduled rest day is paid an additional 30% of\n  the daily rate for the first 8 hours (130%).\n- Work on a special non-working day is paid an additional 30% of the daily\n  rate for the first 8 hours (130%).\n- Overtime work (beyond 8 hours) on a rest day or special non-working day\n  is paid an additional 30% of the hourly rate on said day.\n- Work on a regular holiday is paid 200% of the daily rate for the first\n  8 hours.\n- Unworked special non-working day: no work, no pay (the company has no\n  policy or CBA granting pay for it).\n- Unworked regular holiday: a covered employee is entitled to 100% of the\n  daily rate if present, or on leave of absence with pay, on the workday\n  immediately preceding the regular holiday. If the day immediately\n  preceding the holiday is a non-working day or rest day, the employee must\n  have been present or on paid leave on the workday immediately before that\n  non-working day or rest day.\n- Night shift differential: an additional 10% of the hourly rate for\n  each hour worked between 10:00 PM and 6:00 AM. If the hour is also\n  holiday, rest day, or overtime work, the 10% is computed on the\n  applicable hourly rate for that hour.\n- Meal breaks of 1 hour are unpaid and not counted as hours worked.\n- Round each day's pay to the nearest centavo, then add the days.\n\nSCENARIO:\nGrace is a rank-and-file machine operator at a manufacturing company with\n45 employees; she is covered by the holiday pay and night shift\ndifferential rules. Her daily rate is ₱720. She is paid only for days she\nactually works, except where a rule above gives pay for an unworked day.\nHer workdays are Monday to Saturday and her rest day is Sunday. Her\ntimesheet for a two-week pay period:\n\nWeek 1\n- Monday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Tuesday: worked 8:00 AM to 7:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Wednesday: a special non-working day. The company was closed, so it was a\n  non-working day in the establishment. She did not work.\n- Thursday: a regular holiday. She did not work.\n- Friday: she was absent without pay (no approved leave).\n- Saturday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Sunday (rest day): worked 1:00 PM to 12:00 midnight, unpaid meal break\n  5:00 PM to 6:00 PM.\n\nWeek 2\n- Monday: a regular holiday (not her rest day). She worked 2:00 PM to\n  11:00 PM, unpaid meal break 6:00 PM to 7:00 PM.\n- Tuesday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Wednesday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Thursday: worked 1:00 PM to 12:00 midnight, unpaid meal break 5:00 PM to\n  6:00 PM.\n- Friday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Saturday: a special non-working day. The company opened and she worked\n  8:00 AM to 7:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Sunday (rest day): she did not work.\n\nQUESTION:\nCompute Grace's total pay for the two-week pay period.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "expected_answer": 10201.32,
+  "tolerance": 0.01,
+  "failure_categories": [
+    "treated_closed_day_as_absence_for_holiday_eligibility",
+    "paid_unworked_special_day",
+    "paid_unpaid_absence",
+    "missed_rest_day_premium",
+    "missed_night_differential",
+    "wrong_overtime_factor",
+    "counted_meal_break_as_hours_worked",
+    "arithmetic_error_over_many_days"
+  ],
+  "source_refs": [
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Compliance Guide, A. Guide Computations for Holiday Pay, Premium Pay, Overtime Pay, and Night Shift Differential, pp. 2-3",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 1, C. Rules in Determining Compensable Working Hours (normal working hours of eight hours a day), p. 7",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 3 Premium Pay, D. Premium Pay Rates (incl. 'no work, no pay' on special days), pp. 21-22",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 4 Overtime Pay, C. Overtime Pay Rates, p. 23",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 2 Holiday Pay, D. Holiday Pay Rates, pp. 17-18",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 2 Holiday Pay, E. Absences (item 3: day before the holiday is a non-work day in the establishment or a rest day), p. 18",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 1, D. Monthly-Paid Employees and Daily-Paid Employees (daily-paid: paid on days actually worked and on unworked regular holidays), p. 9",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 5 Night Shift Differential, A. Definition and C. Night Shift Differential Rate, pp. 25-26",
+    "DOLE-BWC Handbook on Workers' Statutory Monetary Benefits, 2024 Edition, Ch. 1, C.5 Meal and Rest Periods (not less than one hour time-off for regular meals), p. 9",
+    "Rounding to the centavo: convention stated in the prompt (the Handbook gives no rounding rule)"
+  ],
+  "reference_inputs": {
+    "kind": "period",
+    "daily_rate": 720,
+    "days": [
+      {
+        "label": "W1 Mon",
+        "day_type": "ordinary",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "17:00"
+          ]
+        ]
+      },
+      {
+        "label": "W1 Tue",
+        "day_type": "ordinary",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "19:00"
+          ]
+        ]
+      },
+      {
+        "label": "W1 Wed",
+        "day_type": "special_non_working",
+        "worked": false
+      },
+      {
+        "label": "W1 Thu",
+        "day_type": "regular_holiday",
+        "worked": false,
+        "preceding_days": [
+          {
+            "kind": "non_working_day"
+          },
+          {
+            "kind": "workday",
+            "attendance": "present"
+          }
+        ]
+      },
+      {
+        "label": "W1 Fri",
+        "day_type": "ordinary",
+        "worked": false
+      },
+      {
+        "label": "W1 Sat",
+        "day_type": "ordinary",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "17:00"
+          ]
+        ]
+      },
+      {
+        "label": "W1 Sun",
+        "day_type": "rest_day",
+        "worked": true,
+        "intervals": [
+          [
+            "13:00",
+            "17:00"
+          ],
+          [
+            "18:00",
+            "24:00"
+          ]
+        ]
+      },
+      {
+        "label": "W2 Mon",
+        "day_type": "regular_holiday",
+        "worked": true,
+        "intervals": [
+          [
+            "14:00",
+            "18:00"
+          ],
+          [
+            "19:00",
+            "23:00"
+          ]
+        ]
+      },
+      {
+        "label": "W2 Tue",
+        "day_type": "ordinary",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "17:00"
+          ]
+        ]
+      },
+      {
+        "label": "W2 Wed",
+        "day_type": "ordinary",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "17:00"
+          ]
+        ]
+      },
+      {
+        "label": "W2 Thu",
+        "day_type": "ordinary",
+        "worked": true,
+        "intervals": [
+          [
+            "13:00",
+            "17:00"
+          ],
+          [
+            "18:00",
+            "24:00"
+          ]
+        ]
+      },
+      {
+        "label": "W2 Fri",
+        "day_type": "ordinary",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "17:00"
+          ]
+        ]
+      },
+      {
+        "label": "W2 Sat",
+        "day_type": "special_non_working",
+        "worked": true,
+        "intervals": [
+          [
+            "08:00",
+            "12:00"
+          ],
+          [
+            "13:00",
+            "19:00"
+          ]
+        ]
+      },
+      {
+        "label": "W2 Sun",
+        "day_type": "rest_day",
+        "worked": false
+      }
+    ]
+  }
+}

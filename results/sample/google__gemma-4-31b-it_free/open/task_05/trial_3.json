@@ -1,0 +1,31 @@
+{
+  "task_id": "task_05",
+  "model": "google/gemma-4-31b-it:free",
+  "served_model": "google/gemma-4-31b-it:free",
+  "provider": "Google AI Studio",
+  "trial": 3,
+  "timestamp": "2026-11-07T16:01:51.610797+00:00",
+  "settings": {
+    "temperature": 0.0,
+    "max_tokens": 4096
+  },
+  "prompt_sha256": "51a00202dd9f2a6f7c990db48aea0146c6ac0b9d106bfdb650826a8f786290e1",
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- Hourly rate = daily rate ÷ 8.\n- An ordinary working day of 8 hours is paid 100% of the daily rate.\n- Work on the employee's scheduled rest day is paid an additional 30% of\n  the daily rate for the first 8 hours (130%).\n- Overtime work (beyond 8 hours) on a rest day is paid an additional 30% of\n  the hourly rate on said day.\n- Work on a regular holiday is paid 200% of the daily rate for the first\n  8 hours.\n- Unworked special non-working day: no work, no pay (the company has no\n  policy or CBA granting pay for it).\n- Night shift differential: an additional 10% of the hourly rate for\n  each hour worked between 10:00 PM and 6:00 AM. If the hour is also\n  holiday, rest day, or overtime work, the 10% is computed on the\n  applicable hourly rate for that hour.\n- Meal breaks of 1 hour are unpaid and not counted as hours worked.\n- Round each day's pay to the nearest centavo, then add the days.\n\nSCENARIO:\nAna is a rank-and-file production worker at a food manufacturing company\nwith 60 employees. Her daily rate is ₱645. Her scheduled rest day is\nSaturday; she works the other six days. This week:\n- Monday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Tuesday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Wednesday: a special non-working day; she did not work.\n- Thursday: a regular holiday (not her rest day); she worked 2:00 PM to\n  11:00 PM, unpaid meal break 6:00 PM to 7:00 PM.\n- Friday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n- Saturday: her rest day; she worked 8:00 AM to 7:00 PM, unpaid meal break\n  12:00 noon to 1:00 PM.\n- Sunday: worked 8:00 AM to 5:00 PM, unpaid meal break 12:00 noon to 1:00 PM.\n\nQUESTION:\nCompute Ana's total pay for the week (Monday to Sunday).\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "response": "**Basic Rates:**\n*   Daily Rate: ₱645.00\n*   Hourly Rate: ₱645.00 ÷ 8 = ₱80.625\n\n**Daily Computations:**\n\n**Monday:**\n*   Hours: 8:00 AM to 5:00 PM (9 hours) minus 1 hour meal = 8 hours.\n*   Pay: 100% of daily rate = **₱645.00**\n\n**Tuesday:**\n*   Hours: 8:00 AM to 5:00 PM (9 hours) minus 1 hour meal = 8 hours.\n*   Pay: 100% of daily rate = **₱645.00**\n\n**Wednesday (Special Non-Working Day):**\n*   No work, no pay = **₱0.00**\n\n**Thursday (Regular Holiday):**\n*   Hours: 2:00 PM to 11:00 PM (9 hours) minus 1 hour meal = 8 hours.\n*   Regular Holiday Rate: 200% of daily rate = ₱645.00 × 2 = ₱1,290.00\n*   Night Shift Differential (NSD): 10:00 PM to 11:00 PM (1 hour).\n    *   Hourly rate for this day: ₱1,290.00 ÷ 8 = ₱161.25\n    *   NSD: ₱161.25 × 10% = ₱16.125\n*   Total for Thursday: ₱1,290.00 + ₱16.125 = ₱1,306.125 $\\approx$ **₱1,306.13**\n\n**Friday:**\n*   Hours: 8:00 AM to 5:00 PM (9 hours) minus 1 hour meal = 8 hours.\n*   Pay: 100% of daily rate = **₱645.00**\n\n**Saturday (Rest Day):**\n*   Hours: 8:00 AM to 7:00 PM (11 hours) minus 1 hour meal = 10 hours.\n*   First 8 hours (Rest Day Rate): 130% of daily rate = ₱645.00 × 1.3 = ₱838.50\n*   Overtime (2 hours):\n    *   Hourly rate for rest day: ₱838.50 ÷ 8 = ₱104.8125\n    *   OT rate: ₱104.8125 × 1.3 = ₱136.25625 per hour\n    *   OT pay: ₱136.25625 × 2 = ₱272.5125\n*   Total for Saturday: ₱838.50 + ₱272.5125 = ₱1,111.0125 $\\approx$ **₱1,111.01**\n\n**Sunday:**\n*   Hours: 8:00 AM to 5:00 PM (9 hours) minus 1 hour meal = 8 hours.\n*   Pay: 100% of daily rate = **₱645.00**\n\n**Total Weekly Pay:**\n₱645.00 (Mon) + ₱645.00 (Tue) + ₱0.00 (Wed) + ₱1,306.13 (Thu) + ₱645.00 (Fri) + ₱1,111.01 (Sat) + ₱645.00 (Sun) = ₱4,997.14\n\nFINAL ANSWER: ₱4,997.14",
+  "reasoning": null,
+  "finish_reason": "stop",
+  "expected_answer": "4997.14",
+  "tolerance": "0.01",
+  "extracted_answer": "4997.14",
+  "status": "pass",
+  "format_reason": null,
+  "passed": true,
+  "score": 1,
+  "latency_seconds": 27.002,
+  "usage": {
+    "prompt_tokens": 651,
+    "completion_tokens": 897,
+    "total_tokens": 1548,
+    "cost_usd": 0
+  }
+}

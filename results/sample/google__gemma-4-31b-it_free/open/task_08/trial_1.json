@@ -1,0 +1,31 @@
+{
+  "task_id": "task_08",
+  "model": "google/gemma-4-31b-it:free",
+  "served_model": "google/gemma-4-31b-it:free",
+  "provider": "Google AI Studio",
+  "trial": 1,
+  "timestamp": "2026-11-07T16:32:39.576556+00:00",
+  "settings": {
+    "temperature": 0.0,
+    "max_tokens": 4096
+  },
+  "prompt_sha256": "ece2e8d8fa5701f01b93b26f9a9559f49b6ff2b5a353189c15287b17eab39705",
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- Separation pay for redundancy: the greater of one month pay, or one\n  month pay for every year of service.\n- Separation pay for retrenchment to prevent losses: the greater of one\n  month pay, or one-half month pay for every year of service.\n- One-half month pay = monthly rate ÷ 2.\n- In computing years of service, a fraction of at least 6 months is\n  considered one whole year. A fraction of less than 6 months is not counted.\n- \"One month pay\" is the monthly rate given below; no other pay\n  components are included.\n\nSCENARIO:\nDan is a rank-and-file machine operator. He was hired on May 1, 2018.\nHis employer retrenched employees to prevent losses, and his last day of\nwork was September 30, 2025, giving him 7 years and 5 months of service.\nHis monthly rate is ₱24,600.\n\nQUESTION:\nCompute Dan's separation pay.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "response": "**1. Determine the Years of Service:**\n*   Hire Date: May 1, 2018\n*   Last Day: September 30, 2025\n*   Total Service: 7 years and 5 months.\n*   Rule: A fraction of less than 6 months is not counted.\n*   Creditable Years of Service: 7 years.\n\n**2. Identify the Applicable Rule for Retrenchment:**\n*   Separation pay for retrenchment to prevent losses is the greater of:\n    a) One month pay\n    b) One-half month pay for every year of service\n\n**3. Perform Computations:**\n*   Monthly Rate: ₱24,600.00\n*   One-half month pay: ₱24,600.00 ÷ 2 = ₱12,300.00\n\n*   Option A (One month pay): ₱24,600.00\n*   Option B (One-half month pay × years of service): ₱12,300.00 × 7 years = ₱86,100.00\n\n**4. Determine the Final Amount:**\n*   The greater amount between ₱24,600.00 and ₱86,100.00 is ₱86,100.00.\n\nFINAL ANSWER: ₱86,100.00",
+  "reasoning": null,
+  "finish_reason": "stop",
+  "expected_answer": "86100.0",
+  "tolerance": "0.01",
+  "extracted_answer": "86100.00",
+  "status": "pass",
+  "format_reason": null,
+  "passed": true,
+  "score": 1,
+  "latency_seconds": 10.353,
+  "usage": {
+    "prompt_tokens": 285,
+    "completion_tokens": 327,
+    "total_tokens": 612,
+    "cost_usd": 0
+  }
+}

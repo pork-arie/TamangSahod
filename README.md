@@ -5,8 +5,6 @@ and labor-compliance computations**. It covers premium pay, holiday pay (includi
 exemptions and eligibility), overtime, night shift differential, weekly payroll, and
 separation pay.
 
-> Fill in every `TODO` before submitting.
-
 ---
 
 ## What the eval tests
@@ -142,6 +140,8 @@ The API key is read from `.env` only. It is never printed, logged, or saved in r
 | `python run_eval.py --max-cost-usd 2.00` | stop starting new trials once this run's reported cost reaches $2.00 |
 | `python run_eval.py --include-drafts` | also run draft tasks |
 | `python report.py --include-drafts` | also report draft tasks, marked DRAFT |
+| `python run_eval.py --condition closed` | closed-book run: the same prompts with the RULES section removed (default `open`) |
+| `python report.py --condition open\|closed` | report one condition only (default: both, side by side) |
 | `python regrade.py [--dry-run]` | re-grade saved trials with the current grader and answer key; no API calls |
 
 **Settings** in `config.yaml`:
@@ -151,7 +151,7 @@ The API key is read from `.env` only. It is never printed, logged, or saved in r
 
 ### Resume, stale results, and regrading
 
-- Each finished trial is saved to `results/raw/<model>/<task>/trial_<n>.json`, and the next
+- Each finished trial is saved to `results/raw/<model>/<condition>/<task>/trial_<n>.json`, and the next
   run skips it. An interrupted run (Ctrl+C, rate limits) continues where it stopped.
 - Each trial records:
   - `prompt` and `prompt_sha256`, `settings` (temperature, max_tokens), `expected_answer`;
@@ -177,15 +177,60 @@ The API key is read from `.env` only. It is never printed, logged, or saved in r
 
 There are also per-task, by-difficulty and by-tag tables, plus a bar chart.
 
-**Expected runtime and cost:** TODO: fill in from your run's printed summary,
-e.g. "N models × M tasks × 3 trials ≈ X minutes, ≈ $Y on OpenRouter".
+**Expected runtime and cost** (from the saved trials):
+- `pytest` and `oracle_check.py` take a few seconds and need no API key.
+- A full run is 10 tasks × 3 trials = 30 calls per model.
+  - Nemotron took about 35 minutes of model time (about 69 s per trial; median 3,852
+    completion tokens).
+  - Gemma took about 15 s per trial (about 470 completion tokens).
+- Both models are OpenRouter **free** variants, so the cost was **$0.00**.
+- Free models are rate-limited (HTTP 429). Expect waits, and re-run the same command to
+  fill in gaps: finished trials are skipped.
 
-**Models and settings used for the reported results:** TODO: copy from `config.yaml`
-(model ids, temperature, max_tokens, trials) and give the run date.
+**Models and settings used for the reported results** (runs from Oct 31 to Nov 8, 2026):
+
+| Model (OpenRouter id) | temperature | max_tokens | trials per task |
+|---|---|---|---|
+| `nvidia/nemotron-3-ultra-550b-a55b:free` | 0.0 | 16384 (per-model override; it is a reasoning model) | 3 |
+| `google/gemma-4-31b-it:free` | 0.0 | 4096 | 3 (some missing, see Limitations) |
+
+### Open-book vs closed-book condition
+
+Every task can run in two conditions:
+
+| Condition | Prompt sent | Tests |
+|---|---|---|
+| `open` (default) | the task prompt as written: rules + scenario + question | applying given rules |
+| `closed` | the **same** prompt with the `RULES (...)` section removed; the intro, scenario, question and `FINAL ANSWER` line are unchanged | knowing Philippine labor rules unaided |
+
+- The expected answers, grader and calculator are the same for both conditions.
+- `tasks/__init__.py` builds the closed prompt by cutting from `RULES (` up to `SCENARIO:`.
+  `oracle_check.py` checks that this works for every task.
+- Each trial records its `condition`, and its `prompt_sha256` is the hash of the prompt
+  actually sent, so the two conditions resume and go stale independently.
+- `report.py` shows them side by side: an "Open vs closed book" table, one column per model
+  per condition in the per-task, difficulty and tag tables, and paired bars in the chart.
+- Two prompts (task_04, task_09) contain the phrase "except where a rule above gives pay for
+  an unworked day". It is kept verbatim in the closed condition, where no rules are shown.
 
 ## Results
 
-TODO: paste `results/summary.md` here.
+Full tables: [results/summary.md](results/summary.md). Verified tasks only.
+
+| Model | Pass rate | pass^k | Format failures | Truncated | Trials |
+|---|---|---|---|---|---|
+| `nvidia/nemotron-3-ultra-550b-a55b:free` | 100% (30/30) | 100% (10/10 tasks, k=3) | 0% | 0% | 30 |
+| `google/gemma-4-31b-it:free` | 100% (16/16) | 100% (7/7 tasks, k=1–3) | 0% | 0% | 16 |
+
+**Headline finding:** when every rule is stated in the prompt, neither model made a single
+computation error. That includes the hardest tasks:
+- a 14-day timesheet where holiday eligibility depends on a day the company was closed;
+- exemption cut-offs at exactly 5, 9 and 10 workers;
+- stacked holiday × rest day × overtime × night multipliers.
+
+Neither model fell into the documented traps: meal break counted, premiums added instead of
+multiplied, the wrong eligibility day, or a fraction rounded the wrong way. The one failure
+this eval did surface is about **output budget**, not arithmetic (see Failure analysis).
 
 ![Pass rate per model](results/pass_rate.png)
 
@@ -193,20 +238,50 @@ Full transcripts of the reported trials are in [results/sample/](results/sample/
 
 ## Failure analysis
 
-TODO: for each common failure, give the category, how many trials it occurred in, and a
-short quoted excerpt from a transcript (`results/sample/...`). Examples to look for:
-- counted the unpaid meal break as hours worked
-- added premiums (200% + 30% + 10%) instead of multiplying them
-- applied the night differential to the basic hourly rate only
-- applied the wrong exemption (holiday pay vs night differential)
-- checked the wrong day for holiday-pay eligibility
-- rounded a years-of-service fraction the wrong way
-- format failures (no final line, or truncated output)
+**1. Reasoning models running out of output budget (the only failure observed).**
+- In the first run, Nemotron used `max_tokens = 4096`. It produced **no final answer in 3 of 3
+  trials** on task_01: `finish_reason = "length"`, all 4,096 tokens used, graded
+  `format_failure`.
+- Its arithmetic was never the problem. The model kept working through the multipliers until
+  it was cut off.
+- After raising its budget to 16,384, it passed 30/30. Even so, the 14-day timesheet
+  (task_09) used **15,695 of 16,384 tokens** in one trial, which is 96% of the budget. One
+  slightly longer chain of thought would have been another format failure.
+- A payroll assistant built on a reasoning model can fail silently on exactly the long,
+  multi-day cases that matter most, unless the output budget is sized for them.
+- The old truncated trials were moved to `results/archive_max_tokens_4096/` (git-ignored).
+  The report flags such cases in the **Truncated** column.
+
+**2. Cost of correctness.** Nemotron needed a median of 3,852 completion tokens and about 69 s
+per task. Gemma needed about 470 tokens and about 15 s. Both were correct, but the reasoning
+model was roughly 8× more expensive in tokens for the same answer.
+
+**3. Designed traps that no model fell into.** Each task's `solution.md` lists the wrong
+answers these mistakes produce, so a judge can check that the grader would catch them:
+- counting the unpaid meal break;
+- adding premiums instead of multiplying them;
+- putting the night differential on the basic rate only;
+- swapping the holiday-pay and night-differential exemptions;
+- checking the wrong day for holiday eligibility;
+- rounding a 5-month fraction up;
+- skipping the one-month minimum.
+
+**What this means:** with the rules in the prompt, these models are reliable calculators of
+Philippine premium, holiday and separation pay. The practical risks are elsewhere:
+- **rule recall:** a user asking "how much is holiday pay on a rest day?" without supplying
+  the rules. This eval deliberately does not test that.
+- **output budget:** a reasoning model truncated before it gives an answer.
 
 ## Limitations
 
-TODO: write this section. Factual notes from the code you may want to use:
-- 8 tasks.
+- **10 tasks, 2 free models.** The results are indicative, not a benchmark. Frontier paid
+  models were not run; `config.yaml` has a placeholder to add them, and `--max-cost-usd`
+  caps the spend.
+- **Gemma coverage is incomplete.** The free tier's rate limits (HTTP 429) prevented 14 of its
+  30 trials, including all of task_02, task_09 and task_10. API errors are never counted
+  as model failures; missing trials are simply absent, and the report shows k per task.
+- **No failures in arithmetic or rule application.** The eval cannot rank these two models
+  against each other on accuracy.
 - Rules are given in the prompt, so this does **not** test whether a model knows Philippine
   law unaided.
 - Private-sector rules only. The calculator raises `NotImplementedError` instead of guessing
@@ -217,7 +292,14 @@ TODO: write this section. Factual notes from the code you may want to use:
   - two or more rest or non-working days before an unworked holiday;
   - 13th month pay and retirement pay.
 
-  See the `TODO(verify)` notes in `reference/calculator.py`.
+  See the `SOURCE:` and `NOTE:` comments in `reference/calculator.py`.
+- **Simplifications kept on purpose:**
+  - The Handbook excludes managerial employees and field personnel from overtime and night
+    differential too; the calculator applies only the holiday-pay exclusion to them, and no
+    task uses them.
+  - The separation-pay base is "the monthly rate given", because the Handbook includes
+    regular allowances and the scenarios state there are none.
+  - Rounding to centavos is a stated convention; the Handbook gives no rounding rule.
 - Model outputs vary between runs, even at temperature 0. pass^k over k trials is reported
   to show consistency.
 - OpenRouter may route a model id to different providers. The served model and provider are
@@ -228,7 +310,7 @@ TODO: write this section. Factual notes from the code you may want to use:
 
 | Before the hackathon | Built during the hackathon |
 |---|---|
-| TODO (e.g. domain knowledge, notes on DOLE rules) | TODO (e.g. all code in this repo, tasks, tests, results) |
+| Nothing. No code, tasks, notes or data existed before the event. | Everything in this repository (Oct 30 – Nov 9, 2026): the calculator, grader, harness, report, packaging scripts, all 10 tasks and solutions, the Handbook verification, all tests, and all results. |
 
 ## Building the submission ZIP
 

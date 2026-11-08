@@ -1,0 +1,31 @@
+{
+  "task_id": "task_01",
+  "model": "google/gemma-4-31b-it:free",
+  "served_model": "google/gemma-4-31b-it:free",
+  "provider": "Google AI Studio",
+  "trial": 3,
+  "timestamp": "2026-11-06T12:21:30.977088+00:00",
+  "settings": {
+    "temperature": 0.0,
+    "max_tokens": 4096
+  },
+  "prompt_sha256": "1bfd7a6eb62175a55ced9ba28e2ff633b31ab602d3675371c4f6ba219ae32a6b",
+  "prompt": "You are computing pay under Philippine labor law (private sector).\n\nRULES (from the DOLE Handbook on Workers' Statutory Monetary Benefits):\n- Hourly rate = daily rate ÷ 8.\n- Work on a regular holiday that is also the employee's scheduled rest day\n  is paid an additional 30% of the regular holiday rate of 200%\n  for the first 8 hours.\n- Overtime work (beyond 8 hours) on a regular holiday that falls on a\n  rest day is paid an additional 30% of the hourly rate on said day.\n- Night shift differential: an additional 10% of the hourly rate for\n  each hour worked between 10:00 PM and 6:00 AM. If the hour is also\n  holiday, rest day, or overtime work, the 10% is computed on the\n  applicable hourly rate for that hour.\n- Meal breaks of 1 hour are unpaid and not counted as hours worked.\n\nSCENARIO:\nMaria is a rank-and-file employee at a manufacturing company with 50\nemployees. Her daily rate is ₱640. December 30 is a regular holiday and\nalso her scheduled rest day. On December 30, she worked from 1:00 PM to\n12:00 midnight, with an unpaid 1-hour meal break from 5:00 PM to 6:00 PM.\n\nQUESTION:\nCompute Maria's total pay for December 30.\n\nShow your computation, then end with exactly one line in this format:\nFINAL ANSWER: ₱<amount with 2 decimals>",
+  "response": "**1. Basic Rates**\n*   Daily Rate: ₱640.00\n*   Hourly Rate: ₱640.00 ÷ 8 = ₱80.00\n\n**2. Applicable Rate for Regular Holiday on a Rest Day**\n*   Regular Holiday Rate: 200%\n*   Additional 30% for Rest Day: 200% × 1.30 = 260%\n*   Hourly Rate for this day: ₱80.00 × 2.60 = ₱208.00\n\n**3. Hours Worked Analysis**\n*   Total Shift: 1:00 PM to 12:00 Midnight (11 hours)\n*   Less Meal Break: 1 hour (5:00 PM to 6:00 PM)\n*   Total Hours Worked: 10 hours\n    *   First 8 hours: 1:00 PM to 10:00 PM (excluding 1 hour break)\n    *   Overtime (OT) hours: 10:00 PM to 12:00 Midnight (2 hours)\n\n**4. Computation of Pay**\n*   **First 8 Hours (Regular Holiday + Rest Day):**\n    8 hours × ₱208.00 = ₱1,664.00\n\n*   **Overtime Pay (Beyond 8 hours):**\n    OT Rate = Hourly Rate on said day × 1.30\n    OT Rate = ₱208.00 × 1.30 = ₱270.40\n    2 hours × ₱270.40 = ₱540.80\n\n*   **Night Shift Differential (NSD):**\n    NSD applies from 10:00 PM to 12:00 Midnight (2 hours).\n    The NSD is 10% of the applicable hourly rate for those hours (which is the OT rate).\n    NSD = ₱270.40 × 0.10 × 2 hours = ₱54.08\n\n**5. Total Pay Calculation**\nTotal Pay = ₱1,664.00 (First 8 hrs) + ₱540.80 (OT) + ₱54.08 (NSD)\nTotal Pay = ₱2,258.88\n\nFINAL ANSWER: ₱2,258.88",
+  "reasoning": null,
+  "finish_reason": "stop",
+  "expected_answer": "2258.88",
+  "tolerance": "0.01",
+  "extracted_answer": "2258.88",
+  "status": "pass",
+  "format_reason": null,
+  "passed": true,
+  "score": 1,
+  "latency_seconds": 17.418,
+  "usage": {
+    "prompt_tokens": 358,
+    "completion_tokens": 559,
+    "total_tokens": 917,
+    "cost_usd": 0
+  }
+}

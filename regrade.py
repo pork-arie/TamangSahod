@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 
 from grader import grade
 from run_eval import RAW_DIR, ROOT, save_json
-from tasks import load_tasks, prompt_sha256, saved_prompt_sha256
+from tasks import load_tasks, prompt_for, prompt_sha256, saved_prompt_sha256, trial_condition
 
 
 def main():
@@ -30,11 +30,12 @@ def main():
     tasks = {t["id"]: t for t in load_tasks("all")}
     counts = {"checked": 0, "changed": 0, "unchanged": 0, "skipped": 0}
 
-    for path in sorted(RAW_DIR.glob("*/*/trial_*.json")):
+    for path in sorted(RAW_DIR.glob("*/*/*/trial_*.json")):  # <model>/<condition>/<task>/
         with open(path, encoding="utf-8") as f:
             trial = json.load(f)
         task = tasks.get(trial["task_id"])
-        if task is None or saved_prompt_sha256(trial) != prompt_sha256(task["prompt"]):
+        if task is None or saved_prompt_sha256(trial) != prompt_sha256(
+                prompt_for(task, trial_condition(trial))):
             counts["skipped"] += 1  # task removed or prompt edited: not comparable
             continue
 

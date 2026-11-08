@@ -7,7 +7,8 @@ What gets copied:
   * only trials whose prompt still matches the task (same prompt_sha256);
     stale trials are skipped
   * only VERIFIED tasks, unless --include-drafts is given
-  * the folder layout is kept: results/sample/<model>/<task>/trial_N.json
+  * both conditions (open and closed) are copied
+  * the folder layout is kept: results/sample/<model>/<condition>/<task>/trial_N.json
 
 results/sample/ is emptied first (except .gitkeep), so it always mirrors the
 current results and never keeps transcripts from old prompts.
@@ -22,7 +23,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from tasks import load_tasks, prompt_sha256, saved_prompt_sha256
+from tasks import load_tasks, prompt_for, prompt_sha256, saved_prompt_sha256, trial_condition
 
 ROOT = Path(__file__).resolve().parent
 RAW_DIR = ROOT / "results" / "raw"
@@ -44,14 +45,14 @@ def clear_sample_dir():
 
 def select_trials(tasks):
     """Return (paths to copy, skipped list of (path, reason))."""
-    current_hash = {t["id"]: prompt_sha256(t["prompt"]) for t in tasks}
+    by_id = {t["id"]: t for t in tasks}
     chosen, skipped = [], []
-    for path in sorted(RAW_DIR.glob("*/*/trial_*.json")):
+    for path in sorted(RAW_DIR.glob("*/*/*/trial_*.json")):  # <model>/<condition>/<task>/
         trial = json.loads(path.read_text(encoding="utf-8"))
         task_id = trial.get("task_id")
-        if task_id not in current_hash:
+        if task_id not in by_id:
             skipped.append((path, "task not selected (draft or removed)"))
-        elif saved_prompt_sha256(trial) != current_hash[task_id]:
+        elif saved_prompt_sha256(trial) != prompt_sha256(prompt_for(by_id[task_id], trial_condition(trial))):
             skipped.append((path, "stale (prompt changed)"))
         elif KEY_PREFIX in path.read_text(encoding="utf-8"):
             skipped.append((path, "contains an API-key-like string; NOT copied"))

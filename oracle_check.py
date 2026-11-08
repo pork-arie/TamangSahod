@@ -1,6 +1,6 @@
 """Oracle check: prove every task is solvable and the grader accepts correct answers.
 
-For each task this runs three checks:
+For each task this runs five checks:
   1. The task's expected_answer, written as a perfect final line, is graded "pass".
   2. The reference calculator (run on the task's reference_inputs) gives the
      same amount as expected_answer, and that output is graded "pass" too.
@@ -8,8 +8,10 @@ For each task this runs three checks:
      shows the grader is not just passing everything.
   4. Verification gate: a task marked "verified": true must have source_refs,
      and none of them may still contain "TODO".
+  5. Closed-book prompt: removing the RULES section leaves a usable prompt
+     (no rules left; scenario, question and FINAL ANSWER format line kept).
 
-Draft tasks (verified=false) get checks 1-3 too, so they are ready to verify.
+Draft tasks (verified=false) get checks 1-3 and 5 too, so they are ready to verify.
 
 Run:  python oracle_check.py      (exit code 0 = all good, 1 = something failed)
 """
@@ -19,7 +21,7 @@ from decimal import Decimal
 
 from grader import grade
 from reference.calculator import compute_from_inputs
-from tasks import load_tasks
+from tasks import load_tasks, prompt_for
 
 
 def check_task(task):
@@ -56,6 +58,18 @@ def check_task(task):
         todo_refs = [r for r in refs if "TODO" in r]
         if todo_refs:
             problems.append(f"verified=true but {len(todo_refs)} source_ref(s) still contain TODO")
+
+    # 5. closed-book prompt is well formed
+    try:
+        closed = prompt_for(task, "closed")
+    except ValueError as e:
+        problems.append(f"cannot build closed-book prompt: {e}")
+    else:
+        if "RULES" in closed:
+            problems.append("closed-book prompt still contains a RULES section")
+        for needed in ("SCENARIO:", "QUESTION:", "FINAL ANSWER: ₱<amount with 2 decimals>"):
+            if needed not in closed:
+                problems.append(f"closed-book prompt lost {needed!r}")
 
     return problems
 

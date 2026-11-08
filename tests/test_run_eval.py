@@ -68,7 +68,7 @@ def run_main(monkeypatch, *cli):
 
 
 def saved(tmp_path, trial=1, model=MODEL):
-    path = tmp_path / "results" / "raw" / run_eval.model_dirname(model) / "task_01" / f"trial_{trial}.json"
+    path = run_eval.trial_path(model, "open", "task_01", trial)
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -115,7 +115,7 @@ def test_resume_skips_trials_with_matching_prompt(sandbox, monkeypatch):
 def test_changed_prompt_moves_old_trial_to_stale_and_reruns(sandbox, monkeypatch):
     tmp_path, calls = sandbox
     run_main(monkeypatch, "--trials", "1")
-    path = tmp_path / "results" / "raw" / run_eval.model_dirname(MODEL) / "task_01" / "trial_1.json"
+    path = run_eval.trial_path(MODEL, "open", "task_01", 1)
     old = json.loads(path.read_text(encoding="utf-8"))
     old["prompt_sha256"] = "0" * 64                    # pretend it ran with an older prompt
     path.write_text(json.dumps(old), encoding="utf-8")
@@ -131,15 +131,15 @@ def test_legacy_trial_without_hash_uses_saved_prompt(tmp_path):
     # Trials saved before prompt_sha256 existed still have the full prompt text.
     path = tmp_path / "trial_1.json"
     path.write_text(json.dumps({"prompt": TASK["prompt"]}), encoding="utf-8")
-    assert run_eval.is_current(path, TASK)
+    assert run_eval.is_current(path, TASK, "open")      # no "condition" field = open
     path.write_text(json.dumps({"prompt": TASK["prompt"] + " edited"}), encoding="utf-8")
-    assert not run_eval.is_current(path, TASK)
+    assert not run_eval.is_current(path, TASK, "open")
 
 
 def test_unreadable_trial_is_treated_as_stale(tmp_path):
     path = tmp_path / "trial_1.json"
     path.write_text("{ half-written", encoding="utf-8")
-    assert not run_eval.is_current(path, TASK)
+    assert not run_eval.is_current(path, TASK, "open")
 
 
 # --- cost cap -------------------------------------------------------------------
@@ -159,7 +159,7 @@ def test_no_cost_cap_runs_everything(sandbox, monkeypatch):
 # --- regrade ---------------------------------------------------------------------
 
 def _write_trial(tmp_path, response, status, extracted, prompt=None):
-    path = tmp_path / "results" / "raw" / "m" / "task_01" / "trial_1.json"
+    path = tmp_path / "results" / "raw" / "m" / "open" / "task_01" / "trial_1.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     record = {"task_id": "task_01", "model": "m", "trial": 1, "prompt": prompt or TASK["prompt"],
               "response": response, "status": status, "extracted_answer": extracted,
@@ -203,7 +203,7 @@ def test_regrade_skips_stale_trials(sandbox, monkeypatch):
 
 def test_report_ignores_stale_and_unknown_tasks(sandbox):
     tmp_path, _ = sandbox
-    raw = tmp_path / "results" / "raw" / "m"
+    raw = tmp_path / "results" / "raw" / "m" / "open"
     for task_id, prompt, name in [("task_01", TASK["prompt"], "current"),
                                   ("task_01", "an older prompt", "stale"),
                                   ("task_99", "whatever", "unknown")]:
