@@ -5,6 +5,7 @@ and labor-compliance computations**. It covers premium pay, holiday pay (includi
 exemptions and eligibility), overtime, night shift differential, weekly payroll, and
 separation pay.
 
+**Video walkthrough:** https://drive.google.com/file/d/1Vhwfj-zgaf1KfewCrb2k7UNvzq3FcJRc/view?usp=sharing
 ---
 
 ## What the eval tests
